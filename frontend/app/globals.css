@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-primary: 'Outfit', sans-serif;
+  --font-secondary: 'Inter', sans-serif;
+  --primary: #6366F1;
+  --primary-light: #818CF8;
+  --accent: #22C55E;
+  --accent-hover: #16a34a;
+  --background: #EEF2FF;
+  --foreground: #171717;
+  --card-bg: #ffffff;
+  --text-main: #312E81;
+  --text-muted: #6366f1;
+  --border: #e2e8f0;
+  --ghost: #f8fafc;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+  --glass: rgba(255, 255, 255, 0.7);
+  --radius: 12px;
+  --max-width: 1400px;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth; /* Make the whole website work "very very smooth" */
+}
+
+/* Custom Aesthetic Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c4b5fd; /* Soft purple */
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed; /* Aesthetic logo color on hover */
+}
+
+body {
+  font-family: var(--font-primary);
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+input, textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Typography */
+h1 { font-size: 3.5rem; font-weight: 700; line-height: 1.1; margin-bottom: 1.5rem; }
+h2 { font-size: 2.2rem; font-weight: 600; margin-bottom: 1rem; }
+h3 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.75rem; }
+
+/* Grid Utilities */
+.grid {
+  display: grid;
+  gap: 2rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}

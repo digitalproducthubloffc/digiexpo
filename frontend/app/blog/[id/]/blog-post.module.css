@@ -1,0 +1,144 @@
+.postWrapper {
+  background-color: white;
+  min-height: 100vh;
+}
+
+.article {
+  padding: 160px 0 100px;
+  max-width: 900px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 3rem;
+  transition: color 0.2s;
+}
+
+.backBtn:hover {
+  color: #7c3aed;
+}
+
+.header {
+  margin-bottom: 3rem;
+}
+
+.meta {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -2px;
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.featuredImage {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 4rem;
+  box-shadow: 0 30px 60px -12px rgba(0,0,0,0.1);
+}
+
+.featuredImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.content {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #334155;
+  margin-bottom: 5rem;
+}
+
+.content p {
+  margin-bottom: 2rem;
+}
+
+.mediaSection {
+  border-top: 1px solid #f1f5f9;
+  padding-top: 4rem;
+}
+
+.mediaSection h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 2rem;
+}
+
+.mediaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.mediaItem {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+}
+
+.mediaItem img, .videoWrapper video {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.videoWrapper {
+  position: relative;
+}
+
+.videoOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.loading, .error {
+  padding: 200px 0;
+  text-align: center;
+  font-weight: 700;
+  color: #7c3aed;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .title { font-size: 2.5rem; }
+  .article { padding-top: 120px; }
+  .meta { gap: 1rem; flex-wrap: wrap; }
+}

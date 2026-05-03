@@ -1,0 +1,153 @@
+.featured {
+  padding: 100px 0;
+  background-color: white;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 4rem;
+}
+
+.badge {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.sectionHeader h2 {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.sectionHeader p {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.viewAll {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: transform 0.2s;
+}
+
+.viewAll:hover {
+  transform: translateX(5px);
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3.5rem; /* Slightly larger gap since there are only 3 */
+}
+
+@media (max-width: 1200px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .productGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.noProducts {
+  text-align: center;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* Newsletter */
+.newsletter {
+  background-color: var(--primary);
+  padding: 100px 0;
+  color: white;
+  text-align: center;
+}
+
+.newsletterContent {
+  max-width: 800px;
+}
+
+.newsletter h2 {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+}
+
+.newsletter p {
+  font-size: 1.2rem;
+  opacity: 0.8;
+  margin-bottom: 3rem;
+}
+
+.subscribeBox {
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.subscribeBox input {
+  flex: 1;
+  border: none;
+  padding: 1rem;
+  font-size: 1rem;
+  outline: none;
+}
+
+.subscribeBox button {
+  background-color: var(--primary-light);
+  color: white;
+  padding: 0 2rem;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+/* Footer */
+.footer {
+  padding: 50px 0;
+  border-top: 1px solid var(--border);
+  background-color: #fcfdfe;
+}
+
+.footerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerContainer p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 2rem;
+}
+
+.footerLinks a {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.footerLinks a:hover {
+  color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  .sectionHeader { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+  .productGrid { grid-template-columns: 1fr; }
+  .newsletter h2 { font-size: 2rem; }
+}

@@ -1,0 +1,158 @@
+.heroSection {
+  position: relative;
+  overflow: hidden;
+  background-color: #fcfcfd;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 1rem 60px; /* Space for the 80px fixed navbar + 40px air */
+}
+
+.container {
+  max-width: 1200px;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.topBadge {
+  background: rgba(124, 58, 237, 0.05);
+  color: #7c3aed;
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-top: 2rem; /* Added margin-top to separate from navbar further */
+  margin-bottom: 2rem;
+  border: 1px solid rgba(124, 58, 237, 0.1);
+  text-transform: uppercase;
+}
+
+/* Badge */
+.badge {
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 30px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #7c3aed;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+/* Headline */
+.headline {
+  font-size: 5rem;
+  font-weight: 500;
+  color: #1e293b;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 2rem;
+  font-family: 'Georgia', serif; /* Or any elegant serif font, fallback to standard serif */
+}
+
+.italicAccent {
+  font-style: italic;
+  font-weight: 400;
+  color: #7c3aed;
+  opacity: 0.85; /* Soften the purple slightly */
+}
+
+/* Subtitle */
+.subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  line-height: 1.6;
+  max-width: 680px;
+  margin-bottom: 3rem;
+  font-weight: 400;
+}
+
+/* Buttons */
+.buttonGroup {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.primaryBtn {
+  background-color: #5b4a8e; /* Muted purple to match screenshot */
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px -5px rgba(91, 74, 142, 0.3);
+}
+
+.primaryBtn:hover {
+  background-color: #4a3c75;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px -5px rgba(91, 74, 142, 0.4);
+}
+
+.secondaryBtn {
+  background-color: white;
+  color: #334155;
+  padding: 1rem 2rem;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.secondaryBtn:hover {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+/* Background Gradients (Ethereal feel) */
+.bgBlobLeft {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  width: 60%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(245, 243, 255, 1) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.bgBlobRight {
+  position: absolute;
+  bottom: -20%;
+  right: -5%;
+  width: 50%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(236, 253, 245, 0.5) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .headline { font-size: 3.5rem; }
+  .buttonGroup { flex-direction: column; width: 100%; max-width: 300px; }
+  .primaryBtn, .secondaryBtn { width: 100%; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .headline { font-size: 2.5rem; }
+  .subtitle { font-size: 1rem; }
+}

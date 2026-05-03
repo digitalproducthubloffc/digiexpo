@@ -1,0 +1,51 @@
+/* CustomCursor.module.css */
+
+.cursorDot,
+.cursorOutline {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 9999;
+  pointer-events: none; /* Let clicks pass through */
+  transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
+}
+
+.cursorDot {
+  width: 8px;
+  height: 8px;
+  background-color: #7c3aed; /* Aesthetic purple */
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+}
+
+.cursorOutline {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(124, 58, 237, 0.6);
+  background-color: rgba(124, 58, 237, 0.05); /* Slight tint inside */
+  /* Make the trailing ring slightly slower to create a smooth trailing effect */
+  transition: opacity 0.15s, transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28), width 0.2s, height 0.2s, top 0.15s ease-out, left 0.15s ease-out;
+}
+
+/* Hover States when over buttons/links */
+.hovering {
+  transform: translate(-50%, -50%) scale(0.5);
+  opacity: 0.5;
+}
+
+.outlineHovering {
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  background-color: rgba(124, 58, 237, 0.08);
+  border: 1px dashed rgba(124, 58, 237, 0.8);
+}
+
+/* Disable the custom cursor for touch devices (smartphones/tablets) */
+@media (pointer: coarse) {
+  .cursorDot,
+  .cursorOutline {
+    display: none;
+  }
+}

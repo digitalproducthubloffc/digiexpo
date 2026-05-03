@@ -1,0 +1,231 @@
+.authPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f4eeff 0%, #fdfcfd 35%, #e6f9ed 100%); /* Ethereal mesh gradient */
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+  position: relative;
+}
+
+/* Floating Auth Header */
+.topLogo {
+  text-align: center;
+  margin-bottom: 2rem;
+  z-index: 10;
+}
+
+.topLogo h1 {
+  font-family: 'Rubik', serif; /* Or another serif */
+  font-style: italic;
+  color: #5b4a8e; /* Beautiful deep aesthetic purple */
+  font-size: 2.2rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.topLogo p {
+  color: #94a3b8;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Auth Card */
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  width: 100%;
+  max-width: 440px;
+}
+
+.authCard {
+  background-color: white;
+  width: 100%;
+  padding: 3.5rem 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+  margin-bottom: 2.5rem;
+}
+
+.header h2 {
+  font-family: 'Rubik', serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Forms */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.inputGroup label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-left: 0.25rem;
+}
+
+.inputGroup input {
+  background-color: #e2e8f0; /* Soft gray from mockup */
+  border: none;
+  padding: 1.25rem 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  outline: none;
+  transition: box-shadow 0.2s;
+}
+
+.inputGroup input::placeholder {
+  color: #94a3b8;
+}
+
+.inputGroup input:focus {
+  box-shadow: 0 0 0 2px rgba(91, 74, 142, 0.2);
+}
+
+.forgotPassword {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: -0.5rem;
+}
+
+.forgotPassword a {
+  font-size: 0.8rem;
+  color: #5b4a8e;
+  font-weight: 600;
+}
+
+.forgotPassword a:hover {
+  text-decoration: underline;
+}
+
+.errorMsg {
+  color: #ef4444;
+  font-size: 0.85rem;
+  background-color: #fef2f2;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.submitBtn {
+  background-color: #5b4a8e; /* Matching deep pill-shaped button */
+  color: white;
+  width: 100%;
+  padding: 1.25rem;
+  border-radius: 50px; /* Fully rounded pill shape */
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submitBtn:hover {
+  background-color: #4b3c75;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(91, 74, 142, 0.3);
+}
+
+/* Footer Link inside Card */
+.footerLink {
+  margin-top: 2.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.footerLink a {
+  color: #5b4a8e;
+  font-weight: 700;
+}
+
+.footerLink a:hover {
+  text-decoration: underline;
+}
+
+/* Subtle underlying icons */
+.subtleIcons {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  color: #cbd5e1; /* Very faint gray */
+  opacity: 0.6;
+}
+
+/* Bottom Right Element */
+.secureBadge {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.secureIcon {
+  background-color: #d1fae5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.secureText {
+  display: flex;
+  flex-direction: column;
+}
+
+.secureText strong {
+  font-size: 0.7rem;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.secureText span {
+  font-size: 0.75rem;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .secureBadge {
+    display: none; /* Hide on mobile to save space */
+  }
+}

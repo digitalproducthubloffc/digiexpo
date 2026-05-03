@@ -1,0 +1,238 @@
+.catalogWrapper {
+  background-color: #f7f9fc;
+  min-height: 100vh;
+  padding-top: 120px; /* Pushes everything below the fixed navbar */
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 4rem;
+  padding: 4rem 2rem;
+}
+
+/* Sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding-right: 2rem;
+}
+
+.filterGroup h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+}
+
+.checkboxList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #475569;
+}
+
+.checkboxLabel input {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #cbd5e1;
+  border-radius: 4px;
+}
+
+.checkboxLabel:hover span {
+  color: var(--accent);
+}
+
+.priceSlider {
+  position: relative;
+  padding-top: 1rem;
+}
+
+.sliderLine {
+  height: 2px;
+  background-color: #cbd5e1;
+  position: relative;
+}
+
+.thumb {
+  width: 12px;
+  height: 12px;
+  background-color: #312E81;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.priceLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.select {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #475569;
+  background-color: white;
+  outline: none;
+}
+
+/* Content Area */
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  margin-bottom: 4rem;
+}
+
+.breadcrumb {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.header h1 {
+  font-size: 5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #0f172a;
+  margin-bottom: 2rem;
+  font-family: 'Rubik', sans-serif;
+}
+
+.header h1 span {
+  color: #312E81;
+}
+
+.headerLine {
+  width: 100px;
+  height: 4px;
+  background: #312E81;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  margin-bottom: 5rem;
+}
+
+@media (max-width: 1400px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.noResults {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 5rem;
+  color: #64748b;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.loadMore {
+  background-color: white;
+  color: #0f172a;
+  padding: 1.25rem 3rem;
+  border-radius: 8px;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.loadMore:hover {
+  border-color: #312E81;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+/* Footer (Page Specific for this layout) */
+.footer {
+  background-color: white;
+  padding: 6rem 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.footerTop {
+  text-align: center;
+}
+
+.footerLogo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #312E81;
+  display: block;
+  margin-bottom: 2rem;
+}
+
+.footerLogo span {
+  color: #0f172a;
+}
+
+.footerLinks {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+.footerLinks a {
+  font-weight: 600;
+  color: #64748b;
+  transition: color 0.2s;
+}
+
+.footerLinks a:hover {
+  color: #312E81;
+}
+
+.footerTop p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 1100px) {
+  .catalogWrapper { padding-top: 80px; }
+  .main { grid-template-columns: 1fr; padding: 2rem 1rem; gap: 0; }
+  .sidebar { display: none; }
+  .content { padding-left: 0; }
+}

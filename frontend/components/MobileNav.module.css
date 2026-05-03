@@ -1,0 +1,75 @@
+.mobileNav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0.6rem 0.5rem calc(0.6rem + env(safe-area-inset-bottom));
+  justify-content: space-around;
+  align-items: center;
+  z-index: 2000;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.65rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.navItem span {
+  font-family: var(--font-secondary);
+}
+
+.navItem svg {
+  transition: transform 0.2s ease;
+}
+
+.active {
+  color: #7c3aed;
+}
+
+.active svg {
+  transform: translateY(-2px);
+}
+
+.iconWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #7c3aed;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 800;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  border: 2px solid white;
+}
+
+@media (max-width: 768px) {
+  .mobileNav {
+    display: flex;
+  }
+}

@@ -1,0 +1,176 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  border: 1px solid #f1f5f9;
+  position: relative;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: #cbd5e1;
+}
+
+.imageWrapper {
+  position: relative;
+  aspect-ratio: 1/1; /* Force square format for images / cards */
+  overflow: hidden;
+  background-color: #f8fafc;
+  display: block;
+}
+
+.imageLink {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .productImage {
+  transform: scale(1.05); /* Slight zoom on card hover */
+}
+
+/* Hover Heart Button */
+.hoverHeartBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: white;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.card:hover .hoverHeartBtn, .wishlistedActive {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hoverHeartBtn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3); /* Aesthetic purple glow on hover */
+}
+
+.hoverHeartBtn:hover svg {
+  color: #7c3aed !important; /* Force aesthetic purple on hover */
+}
+
+.wishlistedActive svg {
+  color: #7c3aed !important; /* Solid purple when favorited */
+  fill: #7c3aed;
+}
+
+/* Badges */
+.newBadge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: #000;
+  color: #fff;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+/* Content Area */
+.content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.categoryTag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #7c3aed; /* Aesthetic Purple */
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  transition: color 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.card:hover .title {
+  color: #7c3aed; /* Headline turns purple on card hover */
+}
+
+.description {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #64748b;
+  margin-bottom: 1.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1; /* Pushes the footer to bottom */
+}
+
+/* Card Bottom */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.price {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: #0f172a;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.addBtn:hover {
+  background-color: #7c3aed; /* Turn purple on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.4);
+}

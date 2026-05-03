@@ -1,0 +1,114 @@
+.footer {
+  background-color: #fafafa;
+  border-top: 1px solid #f1f5f9;
+  padding: 6rem 0 3rem;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #64748b;
+}
+
+.topSection {
+  display: flex;
+  justify-content: space-between;
+  gap: 4rem;
+  padding-bottom: 4rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.brand {
+  max-width: 320px;
+}
+
+.brand h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #7c3aed; /* Aesthetic purple to match navbar logo */
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.01em;
+  font-family: 'Georgia', serif;
+}
+
+.brand p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #94a3b8;
+}
+
+.linkColumns {
+  display: flex;
+  gap: 5rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.column h4 {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+
+.column a {
+  font-size: 0.88rem;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.column a:hover {
+  color: #7c3aed;
+}
+
+.bottomSection {
+  padding-top: 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.socials {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.socials a {
+  color: #94a3b8;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.socials a:hover {
+  color: #7c3aed;
+}
+
+@media (max-width: 960px) {
+  .topSection {
+    flex-direction: column;
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer {
+    padding-bottom: 140px;
+  }
+  .linkColumns {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+  .bottomSection {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+}
