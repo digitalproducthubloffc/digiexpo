@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { API_URL } from '@/lib/api';
+import styles from './SupportForm.module.css';
 
 export default function SupportForm() {
   const [formData, setFormData] = useState({ name: '', email: '', problem: '' });
