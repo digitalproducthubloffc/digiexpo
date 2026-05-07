@@ -180,7 +180,8 @@ router.post('/verify', optionalVerifyToken, async (req, res) => {
 
           // SEND DOWNLOAD EMAIL
           const fileUrl = product.fileUrl || '/downloads/standard-asset';
-          const downloadUrl = fileUrl.startsWith('http') ? fileUrl : `http://localhost:7001${fileUrl}`;
+          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+          const downloadUrl = fileUrl.startsWith('http') ? fileUrl : `${frontendUrl}/dashboard`;
           console.log('📧 [SIMULATION] Attempting to send purchase email to:', user.email);
           
           try {
@@ -201,7 +202,7 @@ router.post('/verify', optionalVerifyToken, async (req, res) => {
 
                   <a href="${downloadUrl}" style="display: block; background: #7c3aed; color: white; text-align: center; padding: 18px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);">Download Files Now</a>
                   
-                  <p style="margin-top: 30px; font-size: 0.85rem; color: #94a3b8; text-align: center;">You can also access this file anytime from your <a href="http://localhost:3000/dashboard" style="color: #7c3aed;">User Dashboard</a>.</p>
+                  <p style="margin-top: 30px; font-size: 0.85rem; color: #94a3b8; text-align: center;">You can also access this file anytime from your <a href="${frontendUrl}/dashboard" style="color: #7c3aed;">User Dashboard</a>.</p>
                 </div>
               </div>
             `);
@@ -244,7 +245,8 @@ router.post('/verify', optionalVerifyToken, async (req, res) => {
             });
 
             // SEND DOWNLOAD EMAIL
-            const downloadUrl = product.fileUrl.startsWith('http') ? product.fileUrl : `http://localhost:7001${product.fileUrl}`;
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+            const downloadUrl = product.fileUrl.startsWith('http') ? product.fileUrl : `${frontendUrl}/dashboard`;
             await sendEmail(user.email, `Order Confirmed: ${product.title}`, `
               <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;">
                 <div style="background: #7c3aed; padding: 40px; text-align: center; color: white;">

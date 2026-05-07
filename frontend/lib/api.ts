@@ -2,10 +2,15 @@ export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:70
 export const API_URL = `${BASE_URL}/api`;
 
 export async function fetchProducts() {
-  const res = await fetch(`${API_URL}/products`);
-  if (!res.ok) throw new Error('Failed to fetch products');
-  return res.json();
+  try {
+    const res = await fetch(`${API_URL}/products`);
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
 }
+
 
 export async function fetchProductById(id: string) {
   const res = await fetch(`${API_URL}/products/${id}`);
