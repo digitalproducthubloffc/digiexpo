@@ -13,10 +13,11 @@ const sendEmail = async (to, subject, html) => {
 
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      family: 4, // Force IPv4 - fixes Render ENETUNREACH error
-      auth: { user, pass }
+      port: 587,
+      secure: false, // STARTTLS - works on Render free tier
+      family: 4,     // Force IPv4
+      auth: { user, pass },
+      tls: { rejectUnauthorized: false }
     });
 
     // Verify connection configuration
