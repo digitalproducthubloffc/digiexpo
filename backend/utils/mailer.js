@@ -12,7 +12,10 @@ const sendEmail = async (to, subject, html) => {
     }
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      family: 4, // Force IPv4 - fixes Render ENETUNREACH error
       auth: { user, pass }
     });
 
