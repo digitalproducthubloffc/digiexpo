@@ -113,7 +113,7 @@ export default function SignupPage() {
             <form className={styles.form} onSubmit={handleFinalSubmit}>
               <div className={styles.inputGroup}>
                 <label>WHICH PRODUCT DO YOU LIKE MOST?</label>
-                <select value={favoriteProduct} onChange={(e) => setFavoriteProduct(e.target.value)} required style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', width: '100%', outline: 'none' }}>
+                <select value={favoriteProduct} onChange={(e) => setFavoriteProduct(e.target.value)} required className={styles.selectInput}>
                   <option value="E-Books">E-Books</option>
                   <option value="Architectural Plans">Architectural Plans</option>
                   <option value="3D Assets">3D Assets</option>
@@ -123,7 +123,7 @@ export default function SignupPage() {
 
               <div className={styles.inputGroup}>
                 <label>WHERE DID YOU FIND THIS WEBSITE?</label>
-                <select value={discoverySource} onChange={(e) => setDiscoverySource(e.target.value)} required style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', width: '100%', outline: 'none' }}>
+                <select value={discoverySource} onChange={(e) => setDiscoverySource(e.target.value)} required className={styles.selectInput}>
                   <option value="Instagram">Instagram</option>
                   <option value="TikTok">TikTok</option>
                   <option value="YouTube">YouTube</option>
@@ -134,7 +134,7 @@ export default function SignupPage() {
 
               <div className={styles.inputGroup}>
                 <label>DO YOU KNOW HOW TO MAKE DIGITAL PRODUCTS?</label>
-                <select value={knowsDigitalCreation} onChange={(e) => setKnowsDigitalCreation(e.target.value)} required style={{ padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', width: '100%', outline: 'none' }}>
+                <select value={knowsDigitalCreation} onChange={(e) => setKnowsDigitalCreation(e.target.value)} required className={styles.selectInput}>
                   <option value="Yes">Yes, I'm a creator</option>
                   <option value="No">No, I'm just looking</option>
                   <option value="Learning">I'm currently learning</option>
@@ -143,11 +143,11 @@ export default function SignupPage() {
 
               {error && <div className={styles.errorMsg}>{error}</div>}
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button type="button" onClick={() => setStep(1)} className={styles.submitBtn} style={{ background: '#94a3b8' }}>
+              <div className={styles.stepButtonGroup}>
+                <button type="button" onClick={() => setStep(1)} className={styles.secondaryBtn}>
                   Back
                 </button>
-                <button type="submit" disabled={loading} className={styles.submitBtn}>
+                <button type="submit" disabled={loading} className={styles.submitBtn} style={{ marginTop: 0 }}>
                   {loading ? 'Completing...' : 'Finish & Enter'}
                 </button>
               </div>
