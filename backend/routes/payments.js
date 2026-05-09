@@ -38,24 +38,15 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
     if (!userId && guestInfo) {
       let user = await User.findOne({ email: guestInfo.email });
       if (!user) {
-        // Create new user (unverified)
-        const otp = crypto.randomInt(100000, 999999).toString();
+        // Create new user (verified immediately since OTP is disabled)
         user = new User({
           name: guestInfo.name,
           email: guestInfo.email,
           password: guestInfo.password || 'TemporaryPassword123!', // Should be changed or set by guest
           phone: guestInfo.phone,
-          otp,
-          otpExpires: Date.now() + 15 * 60 * 1000,
-          isVerified: false
+          isVerified: true
         });
         await user.save();
-        
-        // Send verification email
-        await sendEmail(user.email, "Verify Your Account - DigiExpo Purchase", `
-          <h2>Welcome to DigiExpo!</h2>
-          <p>An account has been created for you. Please verify your email with this code: <strong>${otp}</strong></p>
-        `);
       }
       userId = user._id;
     }
