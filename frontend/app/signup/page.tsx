@@ -22,12 +22,8 @@ export default function SignupPage() {
 
     try {
       const data = await signup({ name, email, password });
-      if (data.needsVerification) {
-        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
-      } else {
-        localStorage.setItem('token', data.token);
-        router.push('/');
-      }
+      localStorage.setItem('token', data.token);
+      router.push('/');
     } catch (err: any) {
       setError(err.message || 'Error occurred during signup.');
     } finally {
@@ -48,7 +44,7 @@ export default function SignupPage() {
         <div className={styles.authCard}>
           <div className={styles.header}>
             <h2>Create Account</h2>
-            <p>Verification OTP will be sent to your email.</p>
+            <p>Join Digital Product Hub today.</p>
           </div>
 
           <form className={styles.form} onSubmit={handleSubmit}>
@@ -88,7 +84,7 @@ export default function SignupPage() {
             {error && <div className={styles.errorMsg}>{error}</div>}
 
             <button type="submit" disabled={loading} className={styles.submitBtn}>
-              {loading ? 'Creating Account...' : 'Continue to Verify'}
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 
@@ -112,7 +108,7 @@ export default function SignupPage() {
          </div>
          <div className={styles.secureText}>
            <strong>SECURE SESSION</strong>
-           <span>15-minute OTP window active</span>
+           <span>Data encrypted in transit</span>
          </div>
       </div>
     </div>

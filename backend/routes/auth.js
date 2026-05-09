@@ -68,10 +68,6 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    if (!user.isVerified) {
-      return res.status(403).json({ message: 'Please verify your email to continue.', needsVerification: true, email: user.email });
-    }
-
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'secret-key', { expiresIn: '24h' });
     res.json({ token, user: { name: user.name, email: user.email } });
   } catch (err) {
@@ -128,25 +124,14 @@ router.post('/signup', async (req, res) => {
   try {
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ message: 'Email already registered.' });
-    
-    const otp = generateOTP();
-    const otpExpires = Date.now() + 15 * 60 * 1000; // 15 mins expiry
 
-    const user = new User({ name, email, password, otp, otpExpires, isVerified: false });
+    // Create user as verified immediately
+    const user = new User({ name, email, password, isVerified: true });
     await user.save();
-    
-    await sendEmail(email, "Verify Your Digital Productsy Account", `
-      <div style="font-family: sans-serif; padding: 20px; border: 1px solid #7c3aed; border-radius: 10px;">
-        <h2 style="color: #7c3aed;">Archivist Verification</h2>
-        <p>Welcome! Your exclusive access code is below:</p>
-        <div style="background: #f8f5ff; padding: 20px; font-size: 2rem; font-weight: 800; text-align: center; color: #7c3aed; letter-spacing: 0.5rem; border-radius: 8px;">
-          ${otp}
-        </div>
-        <p style="margin-top: 20px; color: #64748b;">This code expires in 15 minutes.</p>
-      </div>
-    `);
 
-    res.json({ message: 'Verification code sent to your email.', needsVerification: true, email: user.email });
+    // Log them in immediately
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'secret-key', { expiresIn: '24h' });
+    res.json({ message: 'Account created successfully!', token, user: { name: user.name, email: user.email } });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

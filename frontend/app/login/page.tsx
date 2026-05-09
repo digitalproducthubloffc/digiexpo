@@ -79,7 +79,7 @@ export default function LoginPage() {
             </div>
 
             <div className={styles.forgotPassword}>
-               <Link href="/forgot-password">Forgot Password?</Link>
+               <a href="mailto:digitalproducthubloffc@gmail.com?subject=Password%20Reset%20Request">Forgot Password? Contact Support</a>
             </div>
 
             {error && <div className={styles.errorMsg}>{error}</div>}
