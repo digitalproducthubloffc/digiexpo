@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema({
   otpExpires: { type: Date },
   resetPasswordOtp: { type: String },
   resetPasswordExpires: { type: Date },
+  onboarding: {
+    favoriteProduct: String,
+    discoverySource: String,
+    knowsDigitalCreation: String
+  },
   createdAt: { type: Date, default: Date.now }
 });
 

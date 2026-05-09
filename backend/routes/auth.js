@@ -106,13 +106,13 @@ router.post('/checkout-init', async (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, onboarding } = req.body;
   try {
     const existing = await User.findOne({ email });
     if (existing) return res.status(400).json({ message: 'Email already registered.' });
 
-    // Create user as verified immediately
-    const user = new User({ name, email, password, isVerified: true });
+    // Create user as verified immediately with onboarding data
+    const user = new User({ name, email, password, isVerified: true, onboarding });
     await user.save();
 
     // Log them in immediately

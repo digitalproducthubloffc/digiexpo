@@ -1,7 +1,13 @@
+'use client';
+
 import Link from 'next/link';
 import styles from './Hero.module.css';
 
 export default function Hero() {
+  const handleComingSoon = () => {
+    alert('Coming Soon!');
+  };
+
   return (
     <section className={styles.heroSection}>
       <div className={`${styles.container} container`}>        
@@ -18,12 +24,12 @@ export default function Hero() {
         </p>
         
         <div className={styles.buttonGroup}>
-          <Link href="/catalog" className={styles.primaryBtn}>
-            EXPLORE ARCHIVES
-          </Link>
-          <Link href="/catalog" className={styles.secondaryBtn}>
-            VIEW LATEST
-          </Link>
+          <button onClick={handleComingSoon} className={styles.primaryBtn}>
+            BECOME AFFILIATE
+          </button>
+          <button onClick={handleComingSoon} className={styles.secondaryBtn}>
+            BECOME SELLER
+          </button>
         </div>
       </div>
       
