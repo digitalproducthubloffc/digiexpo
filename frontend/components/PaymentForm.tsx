@@ -17,8 +17,6 @@ export default function PaymentForm({ product }: { product: any }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showOtpField, setShowOtpField] = useState(false);
-  const [otp, setOtp] = useState('');
   const [guestInfo, setGuestInfo] = useState({
     name: '',
     email: '',
@@ -32,7 +30,7 @@ export default function PaymentForm({ product }: { product: any }) {
 
   const initiateGuestVerify = async () => {
     if (!guestInfo.name || !guestInfo.email || !guestInfo.password) {
-      setError('Please provide your name, email, and a password to receive the code.');
+      setError('Please provide your name, email, and a password to create your account.');
       return;
     }
     setIsProcessing(true);
@@ -47,65 +45,14 @@ export default function PaymentForm({ product }: { product: any }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       
-      setShowOtpField(true);
-      setSuccess('Verification code sent to your inbox!');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const resendOtp = async () => {
-    setIsProcessing(true);
-    setError('');
-    setSuccess('');
-    try {
-      const res = await fetch(`${API_URL}/auth/resend-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: guestInfo.email })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      setSuccess('A fresh verification code has been sent!');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleVerifyAndPay = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!otp || otp.length < 6) {
-      setError('Please enter the 6-digit code sent to your email.');
-      return;
-    }
-
-    setIsProcessing(true);
-    setError('');
-    setSuccess('');
-    try {
-      // 1. Verify OTP via POST (fixes @ symbol URL breaking issue)
-      const verifyRes = await fetch(`${API_URL}/auth/verify-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: guestInfo.email, otp })
-      });
-      const verifyData = await verifyRes.json();
-      if (!verifyRes.ok) throw new Error(verifyData.message);
-
-      // 2. Save session token
-      localStorage.setItem('token', verifyData.token);
+      // Save session token directly without OTP
+      localStorage.setItem('token', data.token);
       setIsLoggedIn(true);
       
-      // 3. Show status before opening payment gateway
-      setSuccess('Account verified! Proceeding to payment gateway...');
+      setSuccess('Account ready! Proceeding to payment gateway...');
       
-      // 4. Short delay so user sees the message, then trigger payment
       setTimeout(() => {
-        executePayment(verifyData.token);
+        executePayment(data.token);
       }, 1000);
 
     } catch (err: any) {
@@ -208,12 +155,11 @@ export default function PaymentForm({ product }: { product: any }) {
   return (
     <div className={styles.paymentForm}>
       <h2 className={styles.formTitle}>
-        {isLoggedIn ? 'Payment Method (USD)' : showOtpField ? 'Confirm Your Identity' : 'Secure Billing Details'}
+        {isLoggedIn ? 'Payment Method (USD)' : 'Secure Billing Details'}
       </h2>
 
       {!isLoggedIn && (
         <div className={styles.guestFields}>
-          {!showOtpField ? (
             <>
               <div className={styles.inputGroup}>
                 <label>Full Name</label>
@@ -246,27 +192,6 @@ export default function PaymentForm({ product }: { product: any }) {
                 />
               </div>
             </>
-          ) : (
-            <div className={styles.otpSection}>
-              <div className={styles.otpIcon}><Mail size={32} /></div>
-              <p>We've sent a 6-digit verification code to <strong>{guestInfo.email}</strong>. Enter it below to secure your account and proceed.</p>
-              <div className={styles.inputGroup}>
-                <input 
-                  type="text" 
-                  placeholder="123456" 
-                  maxLength={6}
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  className={styles.otpInput}
-                  autoFocus
-                />
-              </div>
-              <div className={styles.otpActions}>
-                <button type="button" onClick={() => setShowOtpField(false)} className={styles.changeEmailBtn}>Change Email</button>
-                <button type="button" onClick={resendOtp} disabled={isProcessing} className={styles.resendBtn}>Resend Code</button>
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -275,17 +200,17 @@ export default function PaymentForm({ product }: { product: any }) {
         <div className={styles.badge}><Lock size={18} /> SSL Encrypted</div>
       </div>
 
-      <form className={styles.form} onSubmit={showOtpField ? handleVerifyAndPay : isLoggedIn ? handleStandardPayment : (e) => e.preventDefault()}>
+      <form className={styles.form} onSubmit={isLoggedIn ? handleStandardPayment : (e) => e.preventDefault()}>
         {error && <div className={styles.errorMsg}>{error}</div>}
         {success && <div className={styles.successMsg}>{success}</div>}
 
-        {!isLoggedIn && !showOtpField ? (
+        {!isLoggedIn ? (
           <button type="button" onClick={initiateGuestVerify} disabled={isProcessing} className={styles.payBtn}>
-            {isProcessing ? 'Creating Account...' : 'Continue to Verification'}
+            {isProcessing ? 'Creating Account & Loading Gateway...' : `Continue to Pay $${product.realPrice?.toFixed(2)}`}
           </button>
         ) : (
           <button type="submit" disabled={isProcessing} className={styles.payBtn}>
-            {isProcessing ? 'Processing...' : `Verify & Pay $${product.realPrice?.toFixed(2)}`}
+            {isProcessing ? 'Processing...' : `Pay $${product.realPrice?.toFixed(2)}`}
           </button>
         )}
 

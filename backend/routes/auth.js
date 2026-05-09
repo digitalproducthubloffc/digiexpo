@@ -80,40 +80,26 @@ router.post('/checkout-init', async (req, res) => {
   const { name, email, password } = req.body;
   try {
     let user = await User.findOne({ email });
-    const otp = generateOTP();
-    const otpExpires = Date.now() + 15 * 60 * 1000;
 
     if (!user) {
-      // Create a temporary unverified account
+      // Create a verified account instantly
       user = new User({ 
         name: name || 'Valued Archivist', 
         email, 
         password: password || crypto.randomBytes(10).toString('hex'), 
-        otp, 
-        otpExpires, 
-        isVerified: false 
+        isVerified: true 
       });
     } else {
-      // User exists, refresh their OTP and update password if provided
-      user.otp = otp;
-      user.otpExpires = otpExpires;
+      // User exists, update password if provided
       if (password) user.password = password;
     }
     
     await user.save();
     
-    await sendEmail(email, "Verify Your Access - DigiExpo Checkout", `
-      <div style="font-family: sans-serif; padding: 20px; border: 1px solid #7c3aed; border-radius: 10px; max-width: 500px; margin: 0 auto;">
-        <h2 style="color: #7c3aed; text-align: center;">Identity Verification</h2>
-        <p style="color: #475569; text-align: center;">Enter the code below to secure your account and complete your purchase.</p>
-        <div style="background: #f8f5ff; padding: 25px; font-size: 2.5rem; font-weight: 900; text-align: center; color: #7c3aed; letter-spacing: 0.6rem; border-radius: 12px; margin: 20px 0;">
-          ${otp}
-        </div>
-        <p style="font-size: 0.85rem; color: #94a3b8; text-align: center;">This code will expire in 15 minutes.</p>
-      </div>
-    `);
+    // Log them in immediately
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'secret-key', { expiresIn: '24h' });
 
-    res.json({ message: 'Verification code sent.' });
+    res.json({ message: 'Account ready.', token });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
