@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { fetchUserProfile, fetchUserOrders } from '@/lib/api';
 import { BASE_URL } from '@/lib/api';
-import { Package, Download, User, CreditCard, Eye, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Package, Download, User, CreditCard, Eye, ExternalLink, ShieldCheck, Users } from 'lucide-react';
 import styles from './dashboard.module.css';
 
 export default function UserDashboard() {
@@ -231,6 +231,11 @@ export default function UserDashboard() {
               <Eye size={18} /> Recently Viewed
               {recentlyViewed.length > 0 && <span className={styles.tabCount}>{recentlyViewed.length}</span>}
             </button>
+            {user?.role === 'affiliate' && (
+              <Link href="/affiliate/dashboard" className={styles.navItem} style={{ textDecoration: 'none' }}>
+                <Users size={18} /> Affiliate Portal
+              </Link>
+            )}
           </nav>
 
           <button onClick={() => { 
