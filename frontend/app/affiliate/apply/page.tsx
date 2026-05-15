@@ -13,6 +13,7 @@ export default function AffiliateApplyPage() {
   const [password, setPassword] = useState('');
   const [website, setWebsite] = useState('');
   const [audienceSize, setAudienceSize] = useState('Under 10k');
+  const [commission, setCommission] = useState('20%');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,7 +23,7 @@ export default function AffiliateApplyPage() {
     setLoading(true);
     setError('');
     try {
-      await applyAffiliate({ name, email, password, website, audienceSize });
+      await applyAffiliate({ name, email, password, website, audienceSize, commission });
       setSubmitted(true);
     } catch (err: any) {
       setError(err.message || 'Failed to submit application.');
@@ -117,6 +118,21 @@ export default function AffiliateApplyPage() {
                     <option value="10k-50k">10,000 - 50,000</option>
                     <option value="50k-100k">50,000 - 100,000</option>
                     <option value="100k+">100,000+</option>
+                  </select>
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <label>REQUESTED COMMISSION RATE</label>
+                  <select 
+                    value={commission} 
+                    onChange={(e) => setCommission(e.target.value)} 
+                    required 
+                    className={styles.selectInput}
+                    style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', background: '#f8fafc', fontSize: '1rem', color: '#1e293b' }}
+                  >
+                    <option value="10%">10% Commission</option>
+                    <option value="20%">20% Commission</option>
+                    <option value="30%">30% Commission</option>
                   </select>
                 </div>
 

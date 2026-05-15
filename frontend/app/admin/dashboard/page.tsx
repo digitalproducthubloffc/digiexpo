@@ -319,7 +319,7 @@ export default function AdminDashboard() {
                   <div key={app._id} className={styles.tableRow}>
                     <div className={styles.rowInfo}>
                       <h4>{app.name}</h4>
-                      <p>{app.email} • {app.audienceSize} • <a href={app.website} target="_blank" style={{color: 'var(--primary)'}}>{app.website}</a></p>
+                      <p>{app.email} • {app.audienceSize} • {app.commission || '20%'} • <a href={app.website} target="_blank" style={{color: 'var(--primary)'}}>{app.website}</a></p>
                     </div>
                     <div className={styles.rowActions}>
                       <span style={{ marginRight: '15px', fontWeight: 'bold', color: app.status === 'approved' ? 'green' : 'orange' }}>

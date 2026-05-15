@@ -3,21 +3,20 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchUserProfile, BASE_URL } from '@/lib/api';
-import { Copy, CheckCircle2, TrendingUp, DollarSign, MousePointerClick, Activity, LogOut, Home } from 'lucide-react';
-import styles from './affiliateDashboard.module.css';
+import { TrendingUp, DollarSign, MousePointerClick, Activity, LogOut, Home, Clock } from 'lucide-react';
+import styles from '@/app/admin/dashboard/dashboard.module.css';
 
 export default function AffiliateDashboard() {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [copied, setCopied] = useState(false);
   const router = useRouter();
 
-  // Mocked analytics for MVP until tracking is fully built
+  // Reset stats to zero for initial launch
   const stats = {
-    totalSales: 12,
-    totalCommission: 340.50,
-    clicks: 1245,
-    conversionRate: '0.96%'
+    totalSales: 0,
+    totalCommission: 0,
+    clicks: 0,
+    conversionRate: '0%'
   };
 
   useEffect(() => {
@@ -28,12 +27,9 @@ export default function AffiliateDashboard() {
     }
     setToken(t);
     
-    // Fetch user to get their ID to generate the ref link
     fetchUserProfile(t).then(data => {
-      // If user is not an affiliate, we can bounce them or just let them be an affiliate
       if(data.user.role !== 'affiliate' && !data.user.isAdmin) {
-         // Optionally bounce to normal dashboard
-         // router.push('/dashboard');
+         router.push('/dashboard');
       }
       setUser(data.user);
     }).catch(() => {
@@ -42,20 +38,12 @@ export default function AffiliateDashboard() {
     });
   }, []);
 
-  const handleCopy = () => {
-    if (!user) return;
-    const link = `https://digitalproductsy.com/?ref=${user._id}`;
-    navigator.clipboard.writeText(link);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     router.push('/affiliate/login');
   };
 
-  if (!user) return null; // or a loading spinner
+  if (!user) return null;
 
   return (
     <div className={styles.dashboard}>
@@ -88,17 +76,12 @@ export default function AffiliateDashboard() {
             <p>Track your referrals, commissions, and performance.</p>
           </div>
 
-          {/* Unique Affiliate Link Generator */}
-          <div className={styles.linkGenerator}>
-            <div className={styles.linkInfo}>
-              <h3>Your Unique Referral Link</h3>
-              <p>Share this link on your socials. Any purchases made within 30 days will earn you commission.</p>
-            </div>
-            <div className={styles.linkBox}>
-              <span>https://digitalproductsy.com/?ref={user._id}</span>
-              <button onClick={handleCopy} className={styles.copyBtn}>
-                {copied ? <><CheckCircle2 size={18} /> Copied!</> : <><Copy size={18} /> Copy Link</>}
-              </button>
+          {/* Coming Soon Banner */}
+          <div className={styles.statusBanner} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '2rem' }}>
+            <Clock size={32} />
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Products & Referral Links Coming Soon</h3>
+              <p style={{ margin: '5px 0 0', opacity: 0.8 }}>We will share products soon stay tuned and link too. We're currently preparing your unique partner assets.</p>
             </div>
           </div>
 
@@ -138,12 +121,10 @@ export default function AffiliateDashboard() {
           </div>
 
           {/* Recent Sales Table */}
-          <div className={styles.recentSales}>
-            <h3>Recent Conversions</h3>
-            <div className={styles.emptyState}>
-              No recent conversions found in the last 7 days.
-              <br />
-              Keep sharing your link to earn more!
+          <div className={styles.recentSales} style={{ background: 'white', padding: '2rem', borderRadius: '24px', border: '1px solid #f1f5f9' }}>
+            <h3 style={{ marginBottom: '1.5rem', fontWeight: 800 }}>Recent Conversions</h3>
+            <div className={styles.emptyTable}>
+              No recent conversions found. Once products are live and you start sharing your link, your sales will appear here.
             </div>
           </div>
         </main>
@@ -151,3 +132,4 @@ export default function AffiliateDashboard() {
     </div>
   );
 }
+

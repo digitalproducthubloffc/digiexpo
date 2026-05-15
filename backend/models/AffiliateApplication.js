@@ -6,6 +6,7 @@ const affiliateApplicationSchema = new mongoose.Schema({
   password: { type: String, required: true },
   website: { type: String, required: true },
   audienceSize: { type: String, required: true },
+  commission: { type: String, required: true },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
   createdAt: { type: Date, default: Date.now }
 });

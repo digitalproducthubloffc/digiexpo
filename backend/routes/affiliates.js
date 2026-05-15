@@ -6,7 +6,7 @@ const User = require('../models/User');
 // Submit new affiliate application
 router.post('/apply', async (req, res) => {
   try {
-    const { name, email, password, website, audienceSize } = req.body;
+    const { name, email, password, website, audienceSize, commission } = req.body;
     
     // Check if an application already exists
     const existing = await AffiliateApplication.findOne({ email });
@@ -14,7 +14,7 @@ router.post('/apply', async (req, res) => {
       return res.status(400).json({ message: 'Application already submitted for this email.' });
     }
 
-    const application = new AffiliateApplication({ name, email, password, website, audienceSize });
+    const application = new AffiliateApplication({ name, email, password, website, audienceSize, commission });
     await application.save();
 
     res.status(201).json({ message: 'Application submitted successfully', application });
