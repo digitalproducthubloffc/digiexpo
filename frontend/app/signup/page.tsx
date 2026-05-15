@@ -44,6 +44,7 @@ export default function SignupPage() {
         }
       });
       localStorage.setItem('token', data.token);
+      if (data.user?.role) localStorage.setItem('userRole', data.user.role);
       router.push('/');
     } catch (err: any) {
       setError(err.message || 'Error occurred during signup.');

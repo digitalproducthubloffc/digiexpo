@@ -9,6 +9,7 @@ import styles from './Navbar.module.css';
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
@@ -24,6 +25,7 @@ export default function Navbar() {
     setIsMounted(true);
     const token = localStorage.getItem('token');
     setIsLoggedIn(!!token);
+    setUserRole(localStorage.getItem('userRole'));
 
     fetchProducts().then(setAllProducts).catch(console.error);
 
@@ -153,8 +155,10 @@ export default function Navbar() {
                 </Link>
                 <div className={styles.userDropdown}>
                   <Link href="/dashboard">My Dashboard</Link>
+                  {userRole === 'affiliate' && <Link href="/affiliate/dashboard">Affiliate Portal</Link>}
                   <button onClick={() => { 
                     localStorage.removeItem('token'); 
+                    localStorage.removeItem('userRole');
                     localStorage.removeItem('cart');
                     localStorage.removeItem('wishlist');
                     window.location.href = '/'; 

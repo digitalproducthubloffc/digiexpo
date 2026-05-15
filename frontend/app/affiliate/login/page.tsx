@@ -24,6 +24,7 @@ export default function AffiliateLoginPage() {
        // Using regular login for now, this would ideally hit an affiliate-specific endpoint
        const data = await login({ email, password });
        localStorage.setItem('token', data.token);
+       if (data.user?.role) localStorage.setItem('userRole', data.user.role);
        if (data.admin) {
          localStorage.setItem('adminToken', data.token);
          router.push('/admin/dashboard');
