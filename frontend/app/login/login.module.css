@@ -247,6 +247,22 @@
   }
 }
 
+@media (max-width: 480px) {
+  .authPage {
+    padding: 1rem;
+  }
+  .authCard {
+    padding: 2.5rem 1.5rem;
+  }
+  .header h2 {
+    font-size: 1.5rem;
+  }
+  .topLogo h1 {
+    font-size: 1.8rem;
+  }
+}
+
+
 .stepButtonGroup {
   display: flex;
   gap: 1rem;

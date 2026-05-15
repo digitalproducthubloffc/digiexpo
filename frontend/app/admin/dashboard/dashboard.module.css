@@ -486,13 +486,52 @@
     height: auto;
     border-right: none;
     border-bottom: 1px solid #f1f5f9;
+    padding: 1.5rem;
+    position: relative;
   }
   .nav {
     flex-direction: row;
     overflow-x: auto;
     padding-bottom: 0.5rem;
+    gap: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav button {
+    white-space: nowrap;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+  .mainContent {
+    padding: 1.5rem;
   }
   .formGrid {
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 640px) {
+  .sectionHeader h2 {
+    font-size: 1.5rem;
+  }
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+  .countryAnalytics {
+    grid-template-columns: 1fr;
+  }
+  .tableRow {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+  }
+  .rowImg {
+    width: 100%;
+    height: 150px;
+  }
+  .rowActions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+}
+
