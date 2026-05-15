@@ -18,7 +18,7 @@ export default function Hero() {
         </p>
         
         <div className={styles.buttonGroup}>
-          <Link href="/coming-soon" className={styles.primaryBtn}>
+          <Link href="/affiliate" className={styles.primaryBtn}>
             BECOME AFFILIATE
           </Link>
           <Link href="/coming-soon" className={styles.secondaryBtn}>

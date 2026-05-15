@@ -186,3 +186,34 @@ export async function fetchUserOrders(token: string) {
   if (!res.ok) throw new Error('Failed to fetch user orders');
   return res.json();
 }
+
+// Affiliate API
+export async function applyAffiliate(data: any) {
+  const res = await fetch(`${API_URL}/affiliates/apply`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || 'Failed to submit application');
+  }
+  return res.json();
+}
+
+export async function fetchAffiliateApplications(token: string) {
+  const res = await fetch(`${API_URL}/affiliates/applications`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch affiliate applications');
+  return res.json();
+}
+
+export async function approveAffiliateApplication(id: string, token: string) {
+  const res = await fetch(`${API_URL}/affiliates/approve/${id}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to approve application');
+  return res.json();
+}

@@ -3,17 +3,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, BASE_URL } from '@/lib/api';
+import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, BASE_URL } from '@/lib/api';
 import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye } from 'lucide-react';
 import styles from './dashboard.module.css';
 
 export default function AdminDashboard() {
   const [token, setToken] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog'>('analytics');
+  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates'>('analytics');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [allBlogs, setAllBlogs] = useState<any[]>([]);
+  const [affiliateApps, setAffiliateApps] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [countryStats, setCountryStats] = useState<any>({ salesByCountry: [], viewsByCountry: [] });
 
@@ -52,16 +53,18 @@ export default function AdminDashboard() {
 
   const loadDashboardData = async (t: string) => {
     try {
-      const [prods, blogs, s, cs] = await Promise.all([
+      const [prods, blogs, s, cs, apps] = await Promise.all([
         fetchProducts(),
         fetchBlogs(),
         fetchStats(t),
-        fetchSalesByCountry(t)
+        fetchSalesByCountry(t),
+        fetchAffiliateApplications(t)
       ]);
       setAllProducts(prods);
       setAllBlogs(blogs);
       setStats(s);
       setCountryStats(cs);
+      setAffiliateApps(apps);
     } catch (err) {
       console.error(err);
     }
@@ -138,6 +141,9 @@ export default function AdminDashboard() {
             </button>
             <button className={activeTab === 'blog' ? styles.active : ''} onClick={() => setActiveTab('blog')}>
               <BookOpenText size={20} /> Editorial Hub
+            </button>
+            <button className={activeTab === 'affiliates' ? styles.active : ''} onClick={() => setActiveTab('affiliates')}>
+              <Users size={20} /> Affiliates
             </button>
           </nav>
 
@@ -298,6 +304,40 @@ export default function AdminDashboard() {
                     <div className={styles.rowActions}>
                       <Link href={`/product/${p._id}`} target="_blank" className={styles.viewBtn}><ExternalLink size={18} /></Link>
                       <button onClick={() => { if(confirm('Delete?')) deleteProduct(p._id, token!).then(() => loadDashboardData(token!)) }} className={styles.deleteBtn}><Trash2 size={18} /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'affiliates' && (
+            <div className={styles.manageSection}>
+              <div className={styles.sectionHeader}><h2>Affiliate Applications</h2><span>Total Apps: {affiliateApps.length}</span></div>
+              <div className={styles.productTable}>
+                {affiliateApps.map(app => (
+                  <div key={app._id} className={styles.tableRow}>
+                    <div className={styles.rowInfo}>
+                      <h4>{app.name}</h4>
+                      <p>{app.email} • {app.audienceSize} • <a href={app.website} target="_blank" style={{color: 'var(--primary)'}}>{app.website}</a></p>
+                    </div>
+                    <div className={styles.rowActions}>
+                      <span style={{ marginRight: '15px', fontWeight: 'bold', color: app.status === 'approved' ? 'green' : 'orange' }}>
+                        {app.status.toUpperCase()}
+                      </span>
+                      {app.status === 'pending' && (
+                        <button 
+                          onClick={() => {
+                            if(confirm('Approve this affiliate?')) {
+                              approveAffiliateApplication(app._id, token!).then(() => loadDashboardData(token!));
+                            }
+                          }} 
+                          className={styles.publishBtn}
+                          style={{ padding: '8px 16px', margin: '0' }}
+                        >
+                          Approve
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

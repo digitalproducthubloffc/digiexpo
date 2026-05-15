@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
     discoverySource: String,
     knowsDigitalCreation: String
   },
+  role: { type: String, enum: ['user', 'affiliate'], default: 'user' },
   createdAt: { type: Date, default: Date.now }
 });
 
