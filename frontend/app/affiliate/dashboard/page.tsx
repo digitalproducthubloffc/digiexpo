@@ -31,11 +31,11 @@ export default function AffiliateDashboard() {
     // Fetch user to get their ID to generate the ref link
     fetchUserProfile(t).then(data => {
       // If user is not an affiliate, we can bounce them or just let them be an affiliate
-      if(data.role !== 'affiliate' && !data.isAdmin) {
+      if(data.user.role !== 'affiliate' && !data.user.isAdmin) {
          // Optionally bounce to normal dashboard
          // router.push('/dashboard');
       }
-      setUser(data);
+      setUser(data.user);
     }).catch(() => {
       localStorage.removeItem('token');
       router.push('/affiliate/login');
