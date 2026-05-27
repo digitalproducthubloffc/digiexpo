@@ -88,7 +88,14 @@ export async function createProduct(formData: FormData, token: string) {
     body: formData,
   });
   if (res.status === 401 || res.status === 403) throw new Error('401 Unauthorized - session expired');
-  if (!res.ok) throw new Error(`Failed to create product (${res.status})`);
+  if (!res.ok) {
+    let msg = `Failed to create product (${res.status})`;
+    try {
+      const data = await res.json();
+      if (data?.message) msg = data.message;
+    } catch {}
+    throw new Error(msg);
+  }
   return res.json();
 }
 

@@ -48,6 +48,20 @@ router.post('/', verifyAdmin, upload.fields([
   try {
     const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
 
+    const parseMaybeJsonArray = (value, fallback = []) => {
+      if (value === undefined || value === null) return fallback;
+      if (Array.isArray(value)) return value;
+      if (typeof value !== 'string') return fallback;
+      const trimmed = value.trim();
+      if (!trimmed) return fallback;
+      try {
+        const parsed = JSON.parse(trimmed);
+        return Array.isArray(parsed) ? parsed : fallback;
+      } catch {
+        return fallback;
+      }
+    };
+
     // Upload images to Cloudinary (store URLs)
     let image = '';
     if (req.files?.thumbnail?.[0]?.path) {
@@ -89,12 +103,12 @@ router.post('/', verifyAdmin, upload.fields([
     const product = new Product({
       title,
       description,
-      details: typeof details === 'string' ? JSON.parse(details) : details,
-      tags: typeof tags === 'string' ? JSON.parse(tags) : tags,
+      details: parseMaybeJsonArray(details, []),
+      tags: parseMaybeJsonArray(tags, []),
       image,
       images,
       fileUrl,
-      originalPrice: Number(originalPrice),
+      originalPrice: Number(originalPrice || realPrice),
       realPrice: Number(realPrice),
       category,
       postPurchase: parsedPostPurchase

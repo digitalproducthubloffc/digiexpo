@@ -86,7 +86,13 @@ export default function AdminDashboard() {
     setStatus('');
     try {
       const formData = new FormData();
-      Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
+      const safeFields = {
+        ...fields,
+        originalPrice: fields.originalPrice || fields.realPrice,
+        details: fields.details?.trim() ? fields.details : '[]',
+        tags: fields.tags?.trim() ? fields.tags : '[]'
+      };
+      Object.entries(safeFields).forEach(([k, v]) => formData.append(k, v));
       formData.append('postPurchase', JSON.stringify(postPurchaseFields));
       if (thumbnailRef.current?.files?.[0]) formData.append('thumbnail', thumbnailRef.current.files[0]);
       if (galleryRef.current?.files) {
@@ -390,6 +396,10 @@ export default function AdminDashboard() {
                       className={styles.publishBtn}
                       disabled={loading}
                       onClick={() => {
+                        if (!thumbnailRef.current?.files?.[0]) {
+                          setStatus('❌ Please upload the Main Preview image first.');
+                          return;
+                        }
                         if (!fields.title || !fields.description || !fields.realPrice || !fields.category) {
                           setStatus('❌ Please fill Title, Price, Category and Description first.');
                           return;
