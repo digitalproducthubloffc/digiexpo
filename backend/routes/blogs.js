@@ -4,6 +4,8 @@ const Blog = require('../models/Blog');
 const multer = require('multer');
 const path = require('path');
 const { verifyAdmin } = require('./auth');
+const fs = require('fs/promises');
+const { uploadFile } = require('../utils/cloudinary');
 
 // Multer Storage Configuration
 const storage = multer.diskStorage({
@@ -22,16 +24,23 @@ router.post('/', verifyAdmin, upload.fields([
     const { title, subtitle, author, content } = req.body;
     
     let thumbnail = '';
-    if (req.files['thumbnail']) {
-      thumbnail = `/uploads/${req.files['thumbnail'][0].filename}`;
+    if (req.files?.thumbnail?.[0]?.path) {
+      const uploaded = await uploadFile(req.files.thumbnail[0].path, { folder: 'digiexpo/blogs', resourceType: 'image' });
+      thumbnail = uploaded.secure_url;
     }
 
     let media = [];
-    if (req.files['media']) {
-      media = req.files['media'].map(file => ({
-        url: `/uploads/${file.filename}`,
-        type: file.mimetype.startsWith('video/') ? 'video' : 'image'
-      }));
+    if (req.files?.media?.length) {
+      media = await Promise.all(
+        req.files.media.map(async (file) => {
+          const isVideo = file.mimetype?.startsWith('video/');
+          const uploaded = await uploadFile(file.path, { folder: 'digiexpo/blogs', resourceType: isVideo ? 'video' : 'image' });
+          return {
+            url: uploaded.secure_url,
+            type: isVideo ? 'video' : 'image'
+          };
+        })
+      );
     }
 
     const newBlog = new Blog({
@@ -44,6 +53,18 @@ router.post('/', verifyAdmin, upload.fields([
     });
 
     await newBlog.save();
+
+    // Optional: cleanup local uploaded media files
+    const mediaFiles = [
+      ...(req.files?.thumbnail || []),
+      ...(req.files?.media || [])
+    ];
+    await Promise.allSettled(
+      mediaFiles
+        .filter(f => f?.path)
+        .map(f => fs.unlink(f.path))
+    );
+
     res.status(201).json(newBlog);
   } catch (err) {
     res.status(500).json({ message: err.message });

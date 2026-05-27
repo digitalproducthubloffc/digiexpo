@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 const User = require('../models/User');
+const fs = require('fs/promises');
+const { uploadFile } = require('../utils/cloudinary');
 
 // Get all products
 router.get('/', async (req, res) => {
@@ -44,20 +46,29 @@ router.post('/', verifyAdmin, upload.fields([
   const { title, description, originalPrice, realPrice, category, details, tags } = req.body;
   try {
     const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
-    
-    let image = "";
-    if (req.files['thumbnail']) {
-      image = baseUrl + req.files['thumbnail'][0].filename;
+
+    // Upload images to Cloudinary (store URLs)
+    let image = '';
+    if (req.files?.thumbnail?.[0]?.path) {
+      const uploaded = await uploadFile(req.files.thumbnail[0].path, { folder: 'digiexpo/products', resourceType: 'image' });
+      image = uploaded.secure_url;
+      // Keep local file for now; can be cleaned later if you want
     }
 
     let images = [];
-    if (req.files['gallery']) {
-      images = req.files['gallery'].map(file => baseUrl + file.filename);
+    if (req.files?.gallery?.length) {
+      images = await Promise.all(
+        req.files.gallery.map(async (file) => {
+          const uploaded = await uploadFile(file.path, { folder: 'digiexpo/products', resourceType: 'image' });
+          return uploaded.secure_url;
+        })
+      );
     }
 
-    let fileUrl = "";
-    if (req.files['digitalFile']) {
-      fileUrl = baseUrl + req.files['digitalFile'][0].filename;
+    // Keep the digital file locally (downloads)
+    let fileUrl = '';
+    if (req.files?.digitalFile?.[0]?.filename) {
+      fileUrl = baseUrl + req.files.digitalFile[0].filename;
     }
 
     const product = new Product({
@@ -74,6 +85,19 @@ router.post('/', verifyAdmin, upload.fields([
     });
 
     await product.save();
+
+    // Optional: cleanup local image files after upload
+    // (keeps digitalFile for download)
+    const imageFiles = [
+      ...(req.files?.thumbnail || []),
+      ...(req.files?.gallery || [])
+    ];
+    await Promise.allSettled(
+      imageFiles
+        .filter(f => f?.path)
+        .map(f => fs.unlink(f.path))
+    );
+
     res.status(201).json(product);
   } catch (err) {
     res.status(400).json({ message: err.message });
