@@ -41,9 +41,10 @@ const upload = multer({ storage });
 router.post('/', verifyAdmin, upload.fields([
   { name: 'thumbnail', maxCount: 1 },
   { name: 'gallery', maxCount: 10 },
-  { name: 'digitalFile', maxCount: 1 }
+  { name: 'digitalFile', maxCount: 1 },
+  { name: 'postImage', maxCount: 1 }
 ]), async (req, res) => {
-  const { title, description, originalPrice, realPrice, category, details, tags } = req.body;
+  const { title, description, originalPrice, realPrice, category, details, tags, postPurchase } = req.body;
   try {
     const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
 
@@ -71,6 +72,20 @@ router.post('/', verifyAdmin, upload.fields([
       fileUrl = baseUrl + req.files.digitalFile[0].filename;
     }
 
+    let parsedPostPurchase = undefined;
+    if (postPurchase) {
+      try {
+        parsedPostPurchase = typeof postPurchase === 'string' ? JSON.parse(postPurchase) : postPurchase;
+      } catch {
+        parsedPostPurchase = undefined;
+      }
+    }
+
+    if (req.files?.postImage?.[0]?.path) {
+      const uploaded = await uploadFile(req.files.postImage[0].path, { folder: 'digiexpo/products/postpurchase', resourceType: 'image' });
+      parsedPostPurchase = { ...(parsedPostPurchase || {}), imageUrl: uploaded.secure_url };
+    }
+
     const product = new Product({
       title,
       description,
@@ -81,7 +96,8 @@ router.post('/', verifyAdmin, upload.fields([
       fileUrl,
       originalPrice: Number(originalPrice),
       realPrice: Number(realPrice),
-      category
+      category,
+      postPurchase: parsedPostPurchase
     });
 
     await product.save();
@@ -90,7 +106,8 @@ router.post('/', verifyAdmin, upload.fields([
     // (keeps digitalFile for download)
     const imageFiles = [
       ...(req.files?.thumbnail || []),
-      ...(req.files?.gallery || [])
+      ...(req.files?.gallery || []),
+      ...(req.files?.postImage || [])
     ];
     await Promise.allSettled(
       imageFiles

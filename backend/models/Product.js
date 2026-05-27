@@ -25,6 +25,13 @@ const productSchema = new mongoose.Schema({
   fileUrl: { type: String }, // For digital downloads
   fileType: { type: String, default: 'PDF' },
   fileSize: { type: String, default: '5.2 MB' },
+  postPurchase: {
+    headline: { type: String },
+    message: { type: String },
+    linkUrl: { type: String },
+    linkText: { type: String },
+    imageUrl: { type: String }
+  },
   rating: { type: Number, default: 5 },
   numReviews: { type: Number, default: 0 },
   reviews: [reviewSchema],

@@ -19,11 +19,19 @@ export default function AdminDashboard() {
   const [countryStats, setCountryStats] = useState<any>({ salesByCountry: [], viewsByCountry: [] });
 
   // Product Form States
+  const [createStep, setCreateStep] = useState<1 | 2>(1);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
   const [fields, setFields] = useState({
     title: '', description: '', details: '', tags: '', category: 'Cars Drawing', fileType: 'DXF', fileSize: '', originalPrice: '', realPrice: '',
   });
+  const [postPurchaseFields, setPostPurchaseFields] = useState({
+    headline: '',
+    message: '',
+    linkUrl: '',
+    linkText: ''
+  });
+  const [postImagePreview, setPostImagePreview] = useState<string | null>(null);
 
   // Blog Form States
   const [blogThumbPreview, setBlogThumbPreview] = useState<string | null>(null);
@@ -35,6 +43,7 @@ export default function AdminDashboard() {
   const thumbnailRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const digitalFileRef = useRef<HTMLInputElement>(null);
+  const postImageRef = useRef<HTMLInputElement>(null);
   
   const blogThumbRef = useRef<HTMLInputElement>(null);
   const blogMediaRef = useRef<HTMLInputElement>(null);
@@ -78,15 +87,18 @@ export default function AdminDashboard() {
     try {
       const formData = new FormData();
       Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
+      formData.append('postPurchase', JSON.stringify(postPurchaseFields));
       if (thumbnailRef.current?.files?.[0]) formData.append('thumbnail', thumbnailRef.current.files[0]);
       if (galleryRef.current?.files) {
         Array.from(galleryRef.current.files).forEach(f => formData.append('gallery', f));
       }
       if (digitalFileRef.current?.files?.[0]) formData.append('digitalFile', digitalFileRef.current.files[0]);
+      if (postImageRef.current?.files?.[0]) formData.append('postImage', postImageRef.current.files[0]);
       await createProduct(formData, token);
       setStatus('✅ Product published!');
       loadDashboardData(token);
       setActiveTab('manage');
+      setCreateStep(1);
     } catch (err: any) { setStatus(`❌ ${err.message}`); } finally { setLoading(false); }
   };
 
@@ -348,33 +360,108 @@ export default function AdminDashboard() {
           {activeTab === 'create' && (
             <form className={styles.form} onSubmit={handleProductSubmit}>
               <div className={styles.sectionHeader}><h2>Create New Asset</h2><p>Ensure all metadata matches premium standards.</p></div>
-              <div className={styles.formGrid}>
-                <div className={styles.imageCol}>
-                  <div className={styles.fieldBlock}>
-                    <label>Main Preview</label>
-                    <div className={styles.uploadBox} onClick={() => thumbnailRef.current?.click()}>
-                      {thumbnailPreview ? <img src={thumbnailPreview} className={styles.fullPreview} /> : <div className={styles.placeholder}><ImageIcon size={32} /><span>Upload Image</span></div>}
-                      <input ref={thumbnailRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && setThumbnailPreview(URL.createObjectURL(e.target.files[0]))} />
+              {createStep === 1 && (
+                <div className={styles.formGrid}>
+                  <div className={styles.imageCol}>
+                    <div className={styles.fieldBlock}>
+                      <label>Main Preview</label>
+                      <div className={styles.uploadBox} onClick={() => thumbnailRef.current?.click()}>
+                        {thumbnailPreview ? <img src={thumbnailPreview} className={styles.fullPreview} /> : <div className={styles.placeholder}><ImageIcon size={32} /><span>Upload Image</span></div>}
+                        <input ref={thumbnailRef} type="file" accept="image/*" hidden onChange={(e) => e.target.files?.[0] && setThumbnailPreview(URL.createObjectURL(e.target.files[0]))} />
+                      </div>
+                    </div>
+                    <div className={styles.fieldBlock}>
+                      <label>Digital Source</label>
+                      <div className={styles.fileLabel} onClick={() => digitalFileRef.current?.click()}>
+                        <Upload size={18} /> {digitalFileRef.current?.files?.[0]?.name || "Select DXF/PDF/Zip"}
+                        <input ref={digitalFileRef} type="file" hidden />
+                      </div>
                     </div>
                   </div>
-                  <div className={styles.fieldBlock}>
-                    <label>Digital Source</label>
-                    <div className={styles.fileLabel} onClick={() => digitalFileRef.current?.click()}>
-                      <Upload size={18} /> {digitalFileRef.current?.files?.[0]?.name || "Select DXF/PDF/Zip"}
-                      <input ref={digitalFileRef} type="file" hidden />
+                  <div className={styles.metaCol}>
+                    <div className={styles.inputGroup}><label>Title</label><input type="text" value={fields.title} onChange={e => setFields({...fields, title: e.target.value})} required /></div>
+                    <div className={styles.fieldPair}>
+                      <div className={styles.inputGroup}><label>Price ($)</label><input type="number" value={fields.realPrice} onChange={e => setFields({...fields, realPrice: e.target.value})} required /></div>
+                      <div className={styles.inputGroup}><label>Category</label><input type="text" placeholder="Enter Category" value={fields.category} onChange={e => setFields({...fields, category: e.target.value})} required /></div>
                     </div>
+                    <div className={styles.inputGroup}><label>Description</label><textarea rows={4} value={fields.description} onChange={e => setFields({...fields, description: e.target.value})} required /></div>
+                    <button
+                      type="button"
+                      className={styles.publishBtn}
+                      disabled={loading}
+                      onClick={() => {
+                        if (!fields.title || !fields.description || !fields.realPrice || !fields.category) {
+                          setStatus('❌ Please fill Title, Price, Category and Description first.');
+                          return;
+                        }
+                        setStatus('');
+                        setCreateStep(2);
+                      }}
+                    >
+                      Next
+                    </button>
                   </div>
                 </div>
-                <div className={styles.metaCol}>
-                  <div className={styles.inputGroup}><label>Title</label><input type="text" value={fields.title} onChange={e => setFields({...fields, title: e.target.value})} required /></div>
-                  <div className={styles.fieldPair}>
-                    <div className={styles.inputGroup}><label>Price ($)</label><input type="number" value={fields.realPrice} onChange={e => setFields({...fields, realPrice: e.target.value})} required /></div>
-                    <div className={styles.inputGroup}><label>Category</label><input type="text" placeholder="Enter Category" value={fields.category} onChange={e => setFields({...fields, category: e.target.value})} required /></div>
+              )}
+
+              {createStep === 2 && (
+                <div className={styles.formGrid}>
+                  <div className={styles.imageCol}>
+                    <div className={styles.fieldBlock}>
+                      <label>After Payment Image (Optional)</label>
+                      <div className={styles.uploadBox} onClick={() => postImageRef.current?.click()}>
+                        {postImagePreview ? <img src={postImagePreview} className={styles.fullPreview} /> : <div className={styles.placeholder}><ImageIcon size={32} /><span>Upload Image</span></div>}
+                        <input
+                          ref={postImageRef}
+                          type="file"
+                          accept="image/*"
+                          hidden
+                          onChange={(e) => e.target.files?.[0] && setPostImagePreview(URL.createObjectURL(e.target.files[0]))}
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.publishBtn}
+                      style={{ background: 'transparent', border: '1px solid rgba(124,58,237,0.35)', color: 'var(--primary)' }}
+                      disabled={loading}
+                      onClick={() => setCreateStep(1)}
+                    >
+                      Back
+                    </button>
                   </div>
-                  <div className={styles.inputGroup}><label>Description</label><textarea rows={4} value={fields.description} onChange={e => setFields({...fields, description: e.target.value})} required /></div>
-                  <button type="submit" className={styles.publishBtn} disabled={loading}>{loading ? 'Publishing...' : 'Publish to Marketplace'}</button>
+
+                  <div className={styles.metaCol}>
+                    <div className={styles.sectionHeader} style={{ marginBottom: 14 }}>
+                      <h2 style={{ fontSize: 20 }}>After Payment Content</h2>
+                      <p>Add message/link/image shown after purchase.</p>
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                      <label>Headline (Optional)</label>
+                      <input type="text" value={postPurchaseFields.headline} onChange={e => setPostPurchaseFields({ ...postPurchaseFields, headline: e.target.value })} />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label>Message (Optional)</label>
+                      <textarea rows={4} value={postPurchaseFields.message} onChange={e => setPostPurchaseFields({ ...postPurchaseFields, message: e.target.value })} />
+                    </div>
+                    <div className={styles.fieldPair}>
+                      <div className={styles.inputGroup}>
+                        <label>Link URL (Optional)</label>
+                        <input type="url" value={postPurchaseFields.linkUrl} onChange={e => setPostPurchaseFields({ ...postPurchaseFields, linkUrl: e.target.value })} />
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label>Link Text (Optional)</label>
+                        <input type="text" value={postPurchaseFields.linkText} onChange={e => setPostPurchaseFields({ ...postPurchaseFields, linkText: e.target.value })} />
+                      </div>
+                    </div>
+
+                    <button type="submit" className={styles.publishBtn} disabled={loading}>
+                      {loading ? 'Publishing...' : 'Publish to Marketplace'}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </form>
           )}
         </main>
