@@ -17,7 +17,8 @@ const productSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   details: { type: [String], default: [] }, // List of features/what's inside
-  image: { type: String, required: true }, // Main image URL
+  image: { type: String, default: 'https://via.placeholder.com/300x300?text=No+Image', }, // Main image URL (optional)
+
   images: [{ type: String }], // Optional gallery
   originalPrice: { type: Number, required: true }, 
   realPrice: { type: Number, required: true }, // Discounted price

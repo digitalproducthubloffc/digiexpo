@@ -45,6 +45,14 @@ router.post('/', verifyAdmin, upload.fields([
   { name: 'postImage', maxCount: 1 }
 ]), async (req, res) => {
   const { title, description, originalPrice, realPrice, category, details, tags, postPurchase } = req.body;
+
+  // Basic validation of required fields
+  if (!title || !description || !originalPrice || !realPrice || !category) {
+    return res.status(400).json({
+      message: 'Missing required fields: title, description, originalPrice, realPrice, category'
+    });
+  }
+
   try {
     const baseUrl = `${req.protocol}://${req.get('host')}/uploads/`;
 
@@ -63,12 +71,12 @@ router.post('/', verifyAdmin, upload.fields([
     };
 
     // Upload images to Cloudinary (store URLs)
-    let image = '';
+    let image; // leave undefined to use schema default if no thumbnail
     if (req.files?.thumbnail?.[0]?.path) {
       const uploaded = await uploadFile(req.files.thumbnail[0].path, { folder: 'digiexpo/products', resourceType: 'image' });
       image = uploaded.secure_url;
-      // Keep local file for now; can be cleaned later if you want
     }
+
 
     let images = [];
     if (req.files?.gallery?.length) {
