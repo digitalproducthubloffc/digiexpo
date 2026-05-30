@@ -44,10 +44,14 @@ router.post('/', verifyAdmin, upload.fields([
   { name: 'digitalFile', maxCount: 1 },
   { name: 'postImage', maxCount: 1 }
 ]), async (req, res) => {
+  console.log('--- POST /api/products request received ---');
+  console.log('req.body:', req.body);
+  console.log('req.files:', req.files);
   const { title, description, originalPrice, realPrice, category, details, tags, postPurchase } = req.body;
 
   // Basic validation of required fields
   if (!title || !description || !originalPrice || !realPrice || !category) {
+    console.log('Validation Error: Missing required fields');
     return res.status(400).json({
       message: 'Missing required fields: title, description, originalPrice, realPrice, category'
     });
@@ -139,7 +143,8 @@ router.post('/', verifyAdmin, upload.fields([
 
     res.status(201).json(product);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error('Error saving product:', err);
+    res.status(400).json({ message: err.message, stack: err.stack });
   }
 });
 
