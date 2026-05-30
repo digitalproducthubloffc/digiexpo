@@ -4,6 +4,8 @@ import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import styles from './catalog.module.css';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CatalogPage({ searchParams }: { searchParams: Promise<{ cat?: string, q?: string }> }) {
   let products = [];
   try {

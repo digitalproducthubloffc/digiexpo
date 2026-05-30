@@ -411,6 +411,7 @@ export default function AdminDashboard() {
                       Next
                     </button>
                   </div>
+                </div>
               </div>
 
               <div style={{ display: createStep === 2 ? 'block' : 'none' }}>
@@ -469,6 +470,7 @@ export default function AdminDashboard() {
                       {loading ? 'Publishing...' : 'Publish to Marketplace'}
                     </button>
                   </div>
+                </div>
               </div>
 
             </form>

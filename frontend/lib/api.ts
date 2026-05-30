@@ -3,7 +3,7 @@ export const API_URL = `${BASE_URL}/api`;
 
 export async function fetchProducts() {
   try {
-    const res = await fetch(`${API_URL}/products`);
+    const res = await fetch(`${API_URL}/products`, { cache: 'no-store' });
     if (!res.ok) return [];
     return res.json();
   } catch {

@@ -112,6 +112,8 @@ router.post('/', verifyAdmin, upload.fields([
       parsedPostPurchase = { ...(parsedPostPurchase || {}), imageUrl: uploaded.secure_url };
     }
 
+    const { fileType, fileSize } = req.body;
+
     const product = new Product({
       title,
       description,
@@ -123,6 +125,8 @@ router.post('/', verifyAdmin, upload.fields([
       originalPrice: Number(originalPrice || realPrice),
       realPrice: Number(realPrice),
       category,
+      fileType: fileType || 'PDF',
+      fileSize: fileSize || '',
       postPurchase: parsedPostPurchase
     });
 
