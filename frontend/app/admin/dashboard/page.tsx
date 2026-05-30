@@ -366,7 +366,7 @@ export default function AdminDashboard() {
           {activeTab === 'create' && (
             <form className={styles.form} onSubmit={handleProductSubmit}>
               <div className={styles.sectionHeader}><h2>Create New Asset</h2><p>Ensure all metadata matches premium standards.</p></div>
-              {createStep === 1 && (
+              <div style={{ display: createStep === 1 ? 'block' : 'none' }}>
                 <div className={styles.formGrid}>
                   <div className={styles.imageCol}>
                     <div className={styles.fieldBlock}>
@@ -411,10 +411,9 @@ export default function AdminDashboard() {
                       Next
                     </button>
                   </div>
-                </div>
-              )}
+              </div>
 
-              {createStep === 2 && (
+              <div style={{ display: createStep === 2 ? 'block' : 'none' }}>
                 <div className={styles.formGrid}>
                   <div className={styles.imageCol}>
                     <div className={styles.fieldBlock}>
@@ -470,8 +469,8 @@ export default function AdminDashboard() {
                       {loading ? 'Publishing...' : 'Publish to Marketplace'}
                     </button>
                   </div>
-                </div>
-              )}
+              </div>
+
             </form>
           )}
         </main>
