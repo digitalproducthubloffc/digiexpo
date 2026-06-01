@@ -9,6 +9,7 @@ import { fetchProductById, fetchProducts } from '@/lib/api';
 import { Check, Star, FileText, HardDrive, Download } from 'lucide-react';
 import Link from 'next/link';
 import BuyNowButton from '@/components/BuyNowButton';
+import FormattedDescription from '@/components/FormattedDescription';
 import styles from './product.module.css';
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -97,7 +98,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
             <div className={styles.descriptionBox}>
                <h4>DESCRIPTION</h4>
-               <p>{product.description}</p>
+               <FormattedDescription text={product.description} />
             </div>
 
             {/* Features / What's Inside */}

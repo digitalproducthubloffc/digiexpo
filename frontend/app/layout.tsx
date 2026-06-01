@@ -4,6 +4,7 @@ import "./globals.css";
 import CustomCursor from "@/components/CustomCursor";
 import AIAssistant from "@/components/AIAssistant";
 import MobileNav from "@/components/MobileNav";
+import ChatWidget from "@/components/ChatWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
         <CustomCursor />
         {children}
         <AIAssistant />
+        <ChatWidget />
         <MobileNav />
       </body>
     </html>

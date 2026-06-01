@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, BASE_URL } from '@/lib/api';
-import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye } from 'lucide-react';
+import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, fetchAllChats, fetchChatById, adminReplyChat, adminMarkChatRead, adminCloseChat, BASE_URL } from '@/lib/api';
+import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye, MessageCircle, Send, Paperclip } from 'lucide-react';
 import styles from './dashboard.module.css';
 
 export default function AdminDashboard() {
   const [token, setToken] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates'>('analytics');
+  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates' | 'messages'>('analytics');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -17,6 +17,14 @@ export default function AdminDashboard() {
   const [affiliateApps, setAffiliateApps] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [countryStats, setCountryStats] = useState<any>({ salesByCountry: [], viewsByCountry: [] });
+
+  // Chat States
+  const [allChats, setAllChats] = useState<any[]>([]);
+  const [selectedChat, setSelectedChat] = useState<any>(null);
+  const [replyText, setReplyText] = useState('');
+  const [replySending, setReplySending] = useState(false);
+  const chatMediaRef = useRef<HTMLInputElement>(null);
+  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
 
   // Product Form States
   const [createStep, setCreateStep] = useState<1 | 2>(1);
@@ -75,6 +83,69 @@ export default function AdminDashboard() {
       setStats(s);
       setCountryStats(cs);
       setAffiliateApps(apps);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const loadChats = async (t: string) => {
+    try {
+      const chats = await fetchAllChats(t);
+      setAllChats(chats);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const selectChat = async (chatId: string) => {
+    if (!token) return;
+    try {
+      const chat = await fetchChatById(chatId, token);
+      setSelectedChat(chat);
+      await adminMarkChatRead(chatId, token);
+      setTimeout(() => chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAdminReply = async () => {
+    if (!token || !selectedChat || !replyText.trim()) return;
+    setReplySending(true);
+    try {
+      const updated = await adminReplyChat(selectedChat._id, token, replyText.trim());
+      setSelectedChat(updated);
+      setReplyText('');
+      loadChats(token);
+      setTimeout(() => chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setReplySending(false);
+    }
+  };
+
+  const handleAdminMediaReply = async (file: File) => {
+    if (!token || !selectedChat) return;
+    setReplySending(true);
+    try {
+      const updated = await adminReplyChat(selectedChat._id, token, '', file);
+      setSelectedChat(updated);
+      loadChats(token);
+      setTimeout(() => chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setReplySending(false);
+    }
+  };
+
+  const handleCloseChat = async (chatId: string) => {
+    if (!token) return;
+    try {
+      await adminCloseChat(chatId, token);
+      loadChats(token);
+      if (selectedChat?._id === chatId) setSelectedChat(null);
     } catch (err) {
       console.error(err);
     }
@@ -164,6 +235,14 @@ export default function AdminDashboard() {
             </button>
             <button className={activeTab === 'affiliates' ? styles.active : ''} onClick={() => setActiveTab('affiliates')}>
               <Users size={20} /> Affiliates
+            </button>
+            <button className={activeTab === 'messages' ? styles.active : ''} onClick={() => { setActiveTab('messages'); if(token) loadChats(token); }}>
+              <MessageCircle size={20} /> Messages
+              {allChats.filter(c => c.messages?.some((m: any) => m.sender === 'user' && !m.readByAdmin)).length > 0 && (
+                <span style={{ background: '#ef4444', color: 'white', borderRadius: '50%', width: 20, height: 20, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, marginLeft: 6 }}>
+                  {allChats.filter(c => c.messages?.some((m: any) => m.sender === 'user' && !m.readByAdmin)).length}
+                </span>
+              )}
             </button>
           </nav>
 
@@ -482,6 +561,135 @@ export default function AdminDashboard() {
               </div>
 
             </form>
+          )}
+
+          {activeTab === 'messages' && (
+            <div className={styles.chatDashboard}>
+              <div className={styles.sectionHeader}><h2>Customer Messages</h2><p>Respond to customer inquiries in real-time.</p></div>
+              
+              <div className={styles.chatLayout}>
+                {/* Chat List */}
+                <div className={styles.chatList}>
+                  {allChats.length === 0 ? (
+                    <div className={styles.emptyTable} style={{ padding: '3rem 1rem' }}>
+                      <MessageCircle size={32} style={{ marginBottom: 8, opacity: 0.4 }} />
+                      <p>No conversations yet</p>
+                    </div>
+                  ) : (
+                    allChats.map(chat => {
+                      const unread = chat.messages?.filter((m: any) => m.sender === 'user' && !m.readByAdmin).length || 0;
+                      return (
+                        <div 
+                          key={chat._id} 
+                          className={`${styles.chatListItem} ${selectedChat?._id === chat._id ? styles.chatListItemActive : ''}`}
+                          onClick={() => selectChat(chat._id)}
+                        >
+                          <div className={styles.chatListAvatar}>{chat.userName?.[0] || 'U'}</div>
+                          <div className={styles.chatListInfo}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <h4>{chat.userName}</h4>
+                              {unread > 0 && <span className={styles.chatUnreadBadge}>{unread}</span>}
+                            </div>
+                            <p>{chat.lastMessage || 'No messages'}</p>
+                            <span className={styles.chatListTime}>
+                              {new Date(chat.lastMessageAt).toLocaleDateString()} • {chat.status}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Chat Window */}
+                <div className={styles.chatWindow}>
+                  {!selectedChat ? (
+                    <div className={styles.chatWindowEmpty}>
+                      <MessageCircle size={48} />
+                      <h3>Select a conversation</h3>
+                      <p>Choose a chat from the left to start responding</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className={styles.chatWindowHeader}>
+                        <div>
+                          <h3>{selectedChat.userName}</h3>
+                          <span>{selectedChat.userEmail} • {selectedChat.status.toUpperCase()}</span>
+                        </div>
+                        {selectedChat.status === 'open' && (
+                          <button 
+                            onClick={() => handleCloseChat(selectedChat._id)} 
+                            className={styles.deleteBtn}
+                            style={{ padding: '6px 14px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 700, width: 'auto', height: 'auto' }}
+                          >
+                            Close Chat
+                          </button>
+                        )}
+                      </div>
+
+                      <div className={styles.chatWindowMessages}>
+                        {selectedChat.messages?.map((msg: any, i: number) => (
+                          <div key={i} className={`${styles.adminMsgBubble} ${msg.sender === 'admin' ? styles.adminMsgRight : styles.adminMsgLeft}`}>
+                            {msg.mediaUrl && (
+                              <div style={{ marginBottom: 6, borderRadius: 12, overflow: 'hidden' }}>
+                                {msg.mediaType === 'video' ? (
+                                  <video src={msg.mediaUrl} controls style={{ width: '100%', maxHeight: 200, borderRadius: 12 }} />
+                                ) : (
+                                  <img src={msg.mediaUrl} alt="" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 12 }} />
+                                )}
+                              </div>
+                            )}
+                            {msg.text && <p>{msg.text}</p>}
+                            <span className={styles.adminMsgTime}>
+                              {msg.sender === 'admin' ? '🟣 You' : '🔵 User'} • {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        ))}
+                        <div ref={chatMessagesEndRef} />
+                      </div>
+
+                      {selectedChat.status === 'open' && (
+                        <div className={styles.chatWindowInput}>
+                          <button 
+                            className={styles.chatAttachBtn}
+                            onClick={() => chatMediaRef.current?.click()}
+                            disabled={replySending}
+                          >
+                            <Paperclip size={18} />
+                          </button>
+                          <input
+                            ref={chatMediaRef}
+                            type="file"
+                            accept="image/*,video/*"
+                            hidden
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleAdminMediaReply(file);
+                              e.target.value = '';
+                            }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Type a reply..."
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAdminReply(); } }}
+                            disabled={replySending}
+                          />
+                          <button 
+                            onClick={handleAdminReply}
+                            className={styles.chatSendBtn}
+                            disabled={replySending || !replyText.trim()}
+                          >
+                            <Send size={18} />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </main>
       </div>

@@ -224,3 +224,85 @@ export async function approveAffiliateApplication(id: string, token: string) {
   if (!res.ok) throw new Error('Failed to approve application');
   return res.json();
 }
+
+// ───── Chat API ─────
+
+export async function fetchMyChat(token: string) {
+  const res = await fetch(`${API_URL}/chat/my-chat`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch chat');
+  return res.json();
+}
+
+export async function sendChatMessage(token: string, text: string, mediaFile?: File) {
+  const formData = new FormData();
+  if (text) formData.append('text', text);
+  if (mediaFile) formData.append('media', mediaFile);
+
+  const res = await fetch(`${API_URL}/chat/my-chat/send`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData
+  });
+  if (!res.ok) throw new Error('Failed to send message');
+  return res.json();
+}
+
+export async function markChatRead(token: string) {
+  const res = await fetch(`${API_URL}/chat/my-chat/read`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to mark read');
+  return res.json();
+}
+
+// Admin chat endpoints
+export async function fetchAllChats(token: string) {
+  const res = await fetch(`${API_URL}/chat/all`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch chats');
+  return res.json();
+}
+
+export async function fetchChatById(chatId: string, token: string) {
+  const res = await fetch(`${API_URL}/chat/${chatId}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch chat');
+  return res.json();
+}
+
+export async function adminReplyChat(chatId: string, token: string, text: string, mediaFile?: File) {
+  const formData = new FormData();
+  if (text) formData.append('text', text);
+  if (mediaFile) formData.append('media', mediaFile);
+
+  const res = await fetch(`${API_URL}/chat/${chatId}/reply`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData
+  });
+  if (!res.ok) throw new Error('Failed to send reply');
+  return res.json();
+}
+
+export async function adminMarkChatRead(chatId: string, token: string) {
+  const res = await fetch(`${API_URL}/chat/${chatId}/read`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to mark read');
+  return res.json();
+}
+
+export async function adminCloseChat(chatId: string, token: string) {
+  const res = await fetch(`${API_URL}/chat/${chatId}/close`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to close chat');
+  return res.json();
+}

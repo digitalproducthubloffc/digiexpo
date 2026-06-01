@@ -177,7 +177,7 @@
   letter-spacing: 0.1em;
 }
 
-.descriptionBox p {
+.descriptionBox > div {
   color: #475569;
   line-height: 1.8;
   font-size: 1rem;
