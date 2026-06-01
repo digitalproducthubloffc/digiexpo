@@ -245,7 +245,10 @@ export async function sendChatMessage(token: string, text: string, mediaFile?: F
     headers: { 'Authorization': `Bearer ${token}` },
     body: formData
   });
-  if (!res.ok) throw new Error('Failed to send message');
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Server Error (${res.status}): ${errorText}`);
+  }
   return res.json();
 }
 

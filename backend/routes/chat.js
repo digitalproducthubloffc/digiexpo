@@ -6,9 +6,16 @@ const { verifyToken, verifyAdmin } = require('./auth');
 const multer = require('multer');
 const path = require('path');
 
-// Multer storage for chat media — stored locally in uploads/chat/
+const fs = require('fs');
+
+// Multer storage for chat media — stored locally in uploads/
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
+  destination: (req, file, cb) => {
+    if (!fs.existsSync('uploads/')) {
+      fs.mkdirSync('uploads/', { recursive: true });
+    }
+    cb(null, 'uploads/');
+  },
   filename: (req, file, cb) => cb(null, 'chat-' + Date.now() + path.extname(file.originalname))
 });
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB max

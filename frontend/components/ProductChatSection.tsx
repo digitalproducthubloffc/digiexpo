@@ -75,8 +75,9 @@ export default function ProductChatSection({ productId }: Props) {
       const data = await sendChatMessage(token, message.trim());
       setChat(data);
       setMessage('');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert('Error sending message: ' + (err.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -89,8 +90,9 @@ export default function ProductChatSection({ productId }: Props) {
     try {
       const data = await sendChatMessage(token, '', file);
       setChat(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert('Error sending file: ' + (err.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
