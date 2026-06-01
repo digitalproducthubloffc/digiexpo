@@ -2,7 +2,7 @@
 .chatBubble {
   position: fixed;
   bottom: 28px;
-  right: 28px;
+  left: 28px;
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -50,7 +50,7 @@
 .chatPanel {
   position: fixed;
   bottom: 100px;
-  right: 28px;
+  left: 28px;
   width: 380px;
   height: 520px;
   background: white;
@@ -314,7 +314,7 @@
 @media (max-width: 480px) {
   .chatPanel {
     width: calc(100vw - 20px);
-    right: 10px;
+    left: 10px;
     bottom: 90px;
     height: 65vh;
     border-radius: 20px;
@@ -322,7 +322,7 @@
 
   .chatBubble {
     bottom: 20px;
-    right: 20px;
+    left: 20px;
     width: 54px;
     height: 54px;
   }
