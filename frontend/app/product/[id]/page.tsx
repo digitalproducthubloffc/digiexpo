@@ -91,7 +91,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             </div>
 
             <div className={styles.actionButtons}>
-               <BuyNowButton productId={product._id} price={product.realPrice} />
+               <BuyNowButton productId={product._id} price={product.realPrice} externalPurchaseLink={product.externalPurchaseLink} />
                <WishlistButton productId={product._id} title={product.title} />
             </div>
 

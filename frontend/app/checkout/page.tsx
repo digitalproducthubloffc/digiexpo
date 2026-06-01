@@ -111,16 +111,12 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
                 </div>
               )}
               <div className={styles.priceRow}>
-                <span>Platform Fee (2%)</span>
-                <span>${(product.realPrice * 0.02).toFixed(2)}</span>
-              </div>
-              <div className={styles.priceRow}>
-                <span>GST (18%)</span>
-                <span>${(product.realPrice * 0.18).toFixed(2)}</span>
+                <span>Platform Fee</span>
+                <span>$0.30</span>
               </div>
               <div className={`${styles.priceRow} ${styles.total}`}>
                 <span>Total</span>
-                <span>${(product.realPrice + (product.realPrice * 0.20)).toFixed(2)}</span>
+                <span>${(product.realPrice + 0.30).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -129,7 +125,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
           <div className={styles.paymentColumn}>
             <PaymentForm product={{
               ...product,
-              realPrice: (product.realPrice + (product.realPrice * 0.20)) // Final amount after tax + fee
+              realPrice: (product.realPrice + 0.30) // Final amount: price + $0.30 platform fee
             }} />
             
             <div className={styles.refundNotice}>

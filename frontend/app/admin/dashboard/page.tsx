@@ -31,6 +31,7 @@ export default function AdminDashboard() {
     linkUrl: '',
     linkText: ''
   });
+  const [externalPurchaseLink, setExternalPurchaseLink] = useState('');
   const [postImagePreview, setPostImagePreview] = useState<string | null>(null);
 
   // Blog Form States
@@ -94,6 +95,7 @@ export default function AdminDashboard() {
       };
       Object.entries(safeFields).forEach(([k, v]) => formData.append(k, v));
       formData.append('postPurchase', JSON.stringify(postPurchaseFields));
+      formData.append('externalPurchaseLink', externalPurchaseLink);
       if (thumbnailRef.current?.files?.[0]) formData.append('thumbnail', thumbnailRef.current.files[0]);
       if (galleryRef.current?.files) {
         Array.from(galleryRef.current.files).forEach(f => formData.append('gallery', f));
@@ -442,6 +444,12 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className={styles.metaCol}>
+                    <div className={styles.inputGroup} style={{ marginBottom: 18, padding: '16px', background: 'rgba(124,58,237,0.06)', borderRadius: '12px', border: '1px solid rgba(124,58,237,0.15)' }}>
+                      <label style={{ fontWeight: 600, color: 'var(--primary)' }}>🔗 Other Platform Link</label>
+                      <p style={{ fontSize: '12px', color: '#888', margin: '4px 0 8px' }}>Paste your Gumroad, Payhip, or any other platform link. The "Buy Now" button will redirect users to this link.</p>
+                      <input type="url" placeholder="https://gumroad.com/l/your-product" value={externalPurchaseLink} onChange={e => setExternalPurchaseLink(e.target.value)} />
+                    </div>
+
                     <div className={styles.sectionHeader} style={{ marginBottom: 14 }}>
                       <h2 style={{ fontSize: 20 }}>After Payment Content</h2>
                       <p>Add message/link/image shown after purchase.</p>

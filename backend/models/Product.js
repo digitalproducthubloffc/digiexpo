@@ -26,6 +26,7 @@ const productSchema = new mongoose.Schema({
   fileUrl: { type: String }, // For digital downloads
   fileType: { type: String, default: 'PDF' },
   fileSize: { type: String, default: '5.2 MB' },
+  externalPurchaseLink: { type: String, default: '' }, // External platform link (Gumroad, etc.)
   postPurchase: {
     headline: { type: String },
     message: { type: String },
