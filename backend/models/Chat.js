@@ -7,6 +7,8 @@ const messageSchema = new mongoose.Schema({
   mediaType: { type: String, enum: ['image', 'video'] },
   readByAdmin: { type: Boolean, default: false },
   readByUser: { type: Boolean, default: false },
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+  productName: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 

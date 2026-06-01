@@ -235,10 +235,11 @@ export async function fetchMyChat(token: string) {
   return res.json();
 }
 
-export async function sendChatMessage(token: string, text: string, mediaFile?: File) {
+export async function sendChatMessage(token: string, text: string, mediaFile?: File, productId?: string) {
   const formData = new FormData();
   if (text) formData.append('text', text);
   if (mediaFile) formData.append('media', mediaFile);
+  if (productId) formData.append('productId', productId);
 
   const res = await fetch(`${API_URL}/chat/my-chat/send`, {
     method: 'POST',

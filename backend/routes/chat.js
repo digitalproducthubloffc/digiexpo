@@ -55,11 +55,20 @@ router.post('/my-chat/send', verifyToken, upload.single('media'), async (req, re
       });
     }
 
+    let productName;
+    if (req.body.productId) {
+      const Product = require('../models/Product');
+      const product = await Product.findById(req.body.productId);
+      if (product) productName = product.title;
+    }
+
     const message = {
       sender: 'user',
       text: req.body.text || '',
       readByAdmin: false,
-      readByUser: true
+      readByUser: true,
+      productId: req.body.productId || undefined,
+      productName
     };
 
     // Handle media upload

@@ -72,7 +72,7 @@ export default function ProductChatSection({ productId }: Props) {
     if (!token || (!message.trim())) return;
     setLoading(true);
     try {
-      const data = await sendChatMessage(token, message.trim());
+      const data = await sendChatMessage(token, message.trim(), undefined, productId);
       setChat(data);
       setMessage('');
     } catch (err: any) {
@@ -88,7 +88,7 @@ export default function ProductChatSection({ productId }: Props) {
     if (!token) return;
     setLoading(true);
     try {
-      const data = await sendChatMessage(token, '', file);
+      const data = await sendChatMessage(token, '', file, productId);
       setChat(data);
     } catch (err: any) {
       console.error(err);
@@ -153,6 +153,11 @@ export default function ProductChatSection({ productId }: Props) {
                     ) : (
                       <img src={msg.mediaUrl} alt="Shared media" className={styles.mediaContent} />
                     )}
+                  </div>
+                )}
+                {msg.productName && (
+                  <div className={styles.productReference}>
+                    <span>Regarding: <strong>{msg.productName}</strong></span>
                   </div>
                 )}
                 {msg.text && <p>{msg.text}</p>}

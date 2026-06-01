@@ -639,6 +639,11 @@ export default function AdminDashboard() {
                                 )}
                               </div>
                             )}
+                            {msg.productName && (
+                              <div className={styles.productReference}>
+                                <span>Regarding: <strong>{msg.productName}</strong></span>
+                              </div>
+                            )}
                             {msg.text && <p>{msg.text}</p>}
                             <span className={styles.adminMsgTime}>
                               {msg.sender === 'admin' ? '🟣 You' : '🔵 User'} • {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
