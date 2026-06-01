@@ -555,6 +555,15 @@
   border-right: 1px solid #f1f5f9;
   overflow-y: auto;
   background: #fafbfc;
+  min-height: 0;
+  height: 100%;
+}
+.chatList::-webkit-scrollbar {
+  width: 4px;
+}
+.chatList::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
 }
 
 .chatListItem {
