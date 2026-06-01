@@ -9,6 +9,7 @@ import { fetchProductById, fetchProducts } from '@/lib/api';
 import { Check, Star, FileText, HardDrive, Download } from 'lucide-react';
 import Link from 'next/link';
 import BuyNowButton from '@/components/BuyNowButton';
+import ProductChatSection from '@/components/ProductChatSection';
 import FormattedDescription from '@/components/FormattedDescription';
 import styles from './product.module.css';
 
@@ -94,6 +95,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <div className={styles.actionButtons}>
                <BuyNowButton productId={product._id} price={product.realPrice} externalPurchaseLink={product.externalPurchaseLink} />
                <WishlistButton productId={product._id} title={product.title} />
+               <ProductChatSection productId={product._id} />
             </div>
 
             <div className={styles.descriptionBox}>
