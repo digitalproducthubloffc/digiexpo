@@ -32,7 +32,7 @@ export default function FormattedDescription({ text }: Props) {
       }
       
       // Check if it starts with a label like "Template video:" or "What you get:"
-      const labelMatch = trimmed.match(/^([A-Za-z\s]+(?:video|inside|get|includes|features|contents|overview)?)\s*:\s*(.*)/is);
+      const labelMatch = trimmed.match(/^([A-Za-z\s]+(?:video|inside|get|includes|features|contents|overview)?)\s*:\s*([\s\S]*)/i);
       if (labelMatch && labelMatch[1].length < 40) {
         const label = labelMatch[1].trim();
         const rest = labelMatch[2].trim();
@@ -58,14 +58,14 @@ export default function FormattedDescription({ text }: Props) {
       }
       
       // Check if it's a numbered item like "1) Dashboard..." or "2. Daily Planner..."
-      const numberedMatch = trimmed.match(/^(\d+)[\)\.]\s*(.*)/s);
+      const numberedMatch = trimmed.match(/^(\d+)[\)\.]\s*([\s\S]*)/);
       if (numberedMatch) {
         const num = numberedMatch[1];
         const content = numberedMatch[2].trim();
         
         // Further split content by sub-items (like "choose your Top 1 goal choose your...")
         // Look for inner sections separated by common patterns
-        const titleMatch = content.match(/^([^\(]+?)(?:\s*\(([^)]+)\))?\s*(.*)/s);
+        const titleMatch = content.match(/^([^\(]+?)(?:\s*\(([^)]+)\))?\s*([\s\S]*)/);
         
         if (titleMatch) {
           const title = titleMatch[1].trim();
