@@ -21,7 +21,8 @@ const productSchema = new mongoose.Schema({
 
   images: [{ type: String }], // Optional gallery
   originalPrice: { type: Number, required: true }, 
-  realPrice: { type: Number, required: true }, // Discounted price
+  realPrice: { type: Number, required: true }, // Discounted price (USD)
+  priceINR: { type: Number, default: 0 }, // Regional pricing for India
   category: { type: String, required: true },
   fileUrl: { type: String }, // For digital downloads
   fileType: { type: String, default: 'PDF' },

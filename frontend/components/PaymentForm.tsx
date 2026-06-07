@@ -71,8 +71,8 @@ export default function PaymentForm({ product }: { product: any }) {
         },
         body: JSON.stringify({
           productId: product._id,
-          amount: product.realPrice,
-          currency: 'USD'
+          amount: product.calculatedTotal,
+          currency: 'INR'
         })
       });
 
@@ -84,39 +84,12 @@ export default function PaymentForm({ product }: { product: any }) {
         return;
       }
 
-      // Simulation Mode
-      if (orderData.id.startsWith('mock_order_')) {
-        const verifyRes = await fetch(`${API_URL}/payments/verify`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            razorpay_order_id: orderData.id,
-            razorpay_payment_id: "fake_pay_id_123",
-            razorpay_signature: "fake_signature"
-          })
-        });
-
-        const verifyData = await verifyRes.json();
-        if (verifyRes.ok || verifyData.success) {
-           setSuccess("Purchase successful! Redirecting to your dashboard...");
-           setTimeout(() => {
-             router.push(`/order-success?productId=${product._id}`);
-           }, 1500);
-        } else {
-          setError(verifyData.message || "Fulfillment failed. Please check your dashboard.");
-          setIsProcessing(false);
-        }
-        return;
-      }
 
       // Real Mode (Razorpay)
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: Math.round(product.realPrice * 100),
-        currency: "USD",
+        amount: Math.round(product.calculatedTotal * 100),
+        currency: "INR",
         name: "DigiExpo",
         description: `Purchase: ${product.title}`,
         order_id: orderData.id,
@@ -152,10 +125,37 @@ export default function PaymentForm({ product }: { product: any }) {
     if (token) executePayment(token);
   };
 
+  // If USD is selected, we only show the Gumroad button
+  if (product.selectedCurrency === 'USD') {
+    return (
+      <div className={styles.paymentForm}>
+        <h2 className={styles.formTitle}>International Checkout</h2>
+        <div style={{ textAlign: 'center', margin: '40px 0' }}>
+          <p style={{ color: '#64748b', marginBottom: '20px' }}>
+            For USD payments, we securely process transactions via our external partner.
+          </p>
+          <a 
+            href={product.externalPurchaseLink || '#'} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={styles.payBtn}
+            style={{ display: 'inline-block', textDecoration: 'none' }}
+          >
+            Buy Securely via Gumroad
+          </a>
+        </div>
+        <p className={styles.guarantee}>
+          <ShieldCheck size={16} />
+          Encrypted checkout by External Partner.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.paymentForm}>
       <h2 className={styles.formTitle}>
-        {isLoggedIn ? 'Payment Method (USD)' : 'Secure Billing Details'}
+        {isLoggedIn ? 'Payment Method (INR)' : 'Secure Billing Details'}
       </h2>
 
       {!isLoggedIn && (
@@ -206,17 +206,17 @@ export default function PaymentForm({ product }: { product: any }) {
 
         {!isLoggedIn ? (
           <button type="button" onClick={initiateGuestVerify} disabled={isProcessing} className={styles.payBtn}>
-            {isProcessing ? 'Creating Account & Loading Gateway...' : `Continue to Pay $${product.realPrice?.toFixed(2)}`}
+            {isProcessing ? 'Creating Account & Loading Gateway...' : `Continue to Pay ₹${product.calculatedTotal}`}
           </button>
         ) : (
           <button type="submit" disabled={isProcessing} className={styles.payBtn}>
-            {isProcessing ? 'Processing...' : `Pay $${product.realPrice?.toFixed(2)}`}
+            {isProcessing ? 'Processing...' : `Pay ₹${product.calculatedTotal}`}
           </button>
         )}
 
         <p className={styles.guarantee}>
           <ShieldCheck size={16} />
-          Encrypted checkout by DigiExpo.
+          Encrypted checkout by Razorpay.
         </p>
       </form>
     </div>

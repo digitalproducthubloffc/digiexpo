@@ -15,8 +15,8 @@ export default function BuyNowButton({ productId, price, externalPurchaseLink }:
       // Redirect to external platform (Gumroad, Payhip, etc.)
       window.open(externalPurchaseLink, '_blank', 'noopener,noreferrer');
     } else {
-      // Fallback to internal checkout
-      window.location.href = `/checkout?id=${productId}`;
+      // Fallback if no link is provided
+      alert("Online payments are currently disabled. Please contact support to purchase this item.");
     }
   };
 

@@ -1,139 +1,29 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import Script from 'next/script';
-import { fetchProductById } from '@/lib/api';
-import PaymentForm from '@/components/PaymentForm';
-import { ShieldCheck, Lock, CreditCard, Download } from 'lucide-react';
-import styles from './checkout.module.css';
 
-export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
-  const { id } = await searchParams;
-
-  if (!id) {
-    return (
-      <main>
-        <Navbar />
-        <div className="container" style={{ padding: '100px 0', textAlign: 'center' }}>
-          <h2>No product selected</h2>
-          <p>Please select a product to checkout.</p>
-        </div>
-        <Footer />
-      </main>
-    );
-  }
-
-  let product: any;
-  try {
-    product = await fetchProductById(id);
-  } catch {
-    return (
-      <main>
-        <Navbar />
-        <div className="container" style={{ padding: '100px 0', textAlign: 'center' }}>
-          <h2>Product not found</h2>
-        </div>
-        <Footer />
-      </main>
-    );
-  }
-
+export default function CheckoutPage() {
   return (
     <main>
       <Navbar />
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-      <div className={`${styles.checkoutPage} container`}>
-        <h1 className={styles.pageTitle}>Checkout Hub</h1>
-
-        <div className={styles.layout}>
-          {/* Left: Order Summary */}
-          <div className={styles.orderSummary}>
-            <h2>Order Summary</h2>
-
-            <div className={styles.productCard}>
-              <div className={styles.productImage}>
-                <img src={product.image} alt={product.title} />
-              </div>
-              <div className={styles.productInfo}>
-                <span className={styles.category}>{product.category}</span>
-                <h3>{product.title}</h3>
-                <p className={styles.desc}>{product.description?.substring(0, 120)}...</p>
-                <div className={styles.meta}>
-                  <span>{product.fileType || 'PDF'}</span>
-                  <span>•</span>
-                  <span>{product.fileSize || 'Digital'}</span>
-                  <span>•</span>
-                  <span>Instant Download</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Gallery preview */}
-            {product.images && product.images.length > 0 && (
-              <div className={styles.galleryPreview}>
-                <p className={styles.galleryLabel}>Included Files Preview</p>
-                <div className={styles.galleryRow}>
-                  <div className={styles.galleryThumb}>
-                    <img src={product.image} alt="Thumbnail" />
-                  </div>
-                  {product.images.slice(0, 3).map((img: string, i: number) => (
-                    <div key={i} className={styles.galleryThumb}>
-                      <img src={img} alt={`Preview ${i + 1}`} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Features */}
-            {product.details && product.details.length > 0 && (
-              <div className={styles.featuresList}>
-                <p className={styles.galleryLabel}>What You'll Get</p>
-                <ul>
-                  {product.details.map((d: string, i: number) => (
-                    <li key={i}>
-                      <Download size={14} />
-                      {d}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className={styles.priceBreakdown}>
-              <div className={styles.priceRow}>
-                <span>Subtotal</span>
-                <span>${product.originalPrice?.toFixed(2)}</span>
-              </div>
-              {product.originalPrice > product.realPrice && (
-                <div className={`${styles.priceRow} ${styles.discount}`}>
-                  <span>Discount</span>
-                  <span>-${(product.originalPrice - product.realPrice).toFixed(2)}</span>
-                </div>
-              )}
-              <div className={styles.priceRow}>
-                <span>Platform Fee</span>
-                <span>$0.30</span>
-              </div>
-              <div className={`${styles.priceRow} ${styles.total}`}>
-                <span>Total</span>
-                <span>${(product.realPrice + 0.30).toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Payment Form */}
-          <div className={styles.paymentColumn}>
-            <PaymentForm product={{
-              ...product,
-              realPrice: (product.realPrice + 0.30) // Final amount: price + $0.30 platform fee
-            }} />
-            
-            <div className={styles.refundNotice}>
-              <ShieldCheck size={16} />
-              <p><strong>Digital Product Notice:</strong> Due to the nature of digital assets, this product is non-refundable. Once purchased, you will receive permanent access to the files.</p>
-            </div>
-          </div>
-        </div>
+      <div className="container" style={{ padding: '100px 0', textAlign: 'center', minHeight: '60vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <h1 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#0f172a' }}>Internal Checkout Disabled</h1>
+        <p style={{ color: '#64748b', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
+          We are currently processing all transactions securely through our external partner. Please return to the product page and use the Gumroad purchase link.
+        </p>
+        <a 
+          href="/catalog" 
+          style={{ 
+            display: 'inline-block', 
+            background: '#7c3aed', 
+            color: 'white', 
+            padding: '12px 24px', 
+            borderRadius: '8px', 
+            textDecoration: 'none',
+            fontWeight: '600'
+          }}
+        >
+          Return to Catalog
+        </a>
       </div>
       <Footer />
     </main>

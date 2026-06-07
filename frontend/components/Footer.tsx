@@ -27,6 +27,7 @@ export default function Footer() {
               <Link href="/catalog">All Products</Link>
               <Link href="/blog">Our Insights</Link>
               <Link href="/support">Help Center</Link>
+              <Link href="/contact">Contact Us</Link>
             </div>
             <div className={styles.column}>
               <h4>Account</h4>
@@ -42,6 +43,8 @@ export default function Footer() {
               <h4>Legal</h4>
               <Link href="/privacy">Privacy Policy <ArrowUpRight size={12} /></Link>
               <Link href="/terms">Terms of Service <ArrowUpRight size={12} /></Link>
+              <Link href="/refund">Refund Policy <ArrowUpRight size={12} /></Link>
+              <Link href="/shipping">Shipping & Delivery <ArrowUpRight size={12} /></Link>
             </div>
           </div>
         </div>

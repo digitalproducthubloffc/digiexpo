@@ -72,30 +72,6 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
       return res.json({ id: transaction.orderId, free: true });
     }
 
-    // Check if we are in Simulation Mode (no real keys)
-    if (process.env.RAZORPAY_KEY_ID === 'rzp_test_mock_123' || !process.env.RAZORPAY_KEY_ID) {
-      console.log('🚀 [SIMULATION] Generating mock payment order for localhost testing.');
-      const mockOrderId = `mock_order_${Date.now()}`;
-      
-      const transaction = new Transaction({
-        orderId: mockOrderId,
-        userId,
-        productId,
-        amount,
-        currency,
-        ip: clientIp,
-        status: 'pending',
-        logs: [{ event: 'Created Mock Order (Simulation)', metadata: { mockOrderId } }]
-      });
-      await transaction.save();
-
-      return res.json({
-        id: mockOrderId,
-        amount: Math.round(amount * 100),
-        currency,
-        notes: { productId, userId, ip: clientIp, simulation: true }
-      });
-    }
 
     const options = {
       amount: Math.round(amount * 100), // convert to paise
@@ -134,79 +110,7 @@ router.post('/verify', optionalVerifyToken, async (req, res) => {
   const clientIp = requestIp.getClientIp(req);
 
   try {
-    // Simulation Success Link
-    if (razorpay_order_id && razorpay_order_id.startsWith('mock_order_')) {
-      console.log(`✅ [SIMULATION] Verifying mock order: ${razorpay_order_id}`);
-      console.log(`🔍 [DEBUG] Searching for transaction in DB...`);
-      
-      const transaction = await Transaction.findOne({ orderId: razorpay_order_id });
-      if (!transaction) {
-        console.log(`❌ [SIMULATION] Transaction record NOT FOUND for orderId: ${razorpay_order_id}`);
-        // List recent transactions for debugging
-        const recent = await Transaction.find().sort({createdAt:-1}).limit(3);
-        console.log('📝 [DEBUG] Last 3 Transaction IDs in DB:', recent.map(t => t.orderId));
-        return res.status(404).json({ message: "Transaction not found" });
-      }
 
-      transaction.status = 'completed';
-      transaction.paymentId = `mock_pay_${Date.now()}`;
-      transaction.logs.push({ event: 'Simulation Success - Mock Delivery', metadata: { ip: clientIp } });
-      await transaction.save();
-      console.log('✅ [SIMULATION] Transaction marked COMPLETED');
-
-      if (transaction.userId && transaction.productId) {
-        console.log(`🔍 [DEBUG] Order: ${transaction.orderId} | UserID: ${transaction.userId} | ProductID: ${transaction.productId}`);
-        const user = await User.findById(transaction.userId);
-        const product = await Product.findById(transaction.productId);
-        
-        if (!user) console.log('❌ [DEBUG] User NOT FOUND in database!');
-        if (!product) console.log('❌ [DEBUG] Product NOT FOUND in database!');
-
-        if (user && product) {
-          console.log(`✅ [DEBUG] Found Recipient: ${user.email} | Delivering: ${product.title}`);
-          
-          await User.findByIdAndUpdate(transaction.userId, { 
-            $addToSet: { purchasedProducts: transaction.productId } 
-          });
-
-          // SEND DOWNLOAD EMAIL
-          const fileUrl = product.fileUrl || '/downloads/standard-asset';
-          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-          const downloadUrl = fileUrl.startsWith('http') ? fileUrl : `${frontendUrl}/dashboard`;
-          console.log('📧 [SIMULATION] Attempting to send purchase email to:', user.email);
-          
-          try {
-            await sendEmail(user.email, `Order Success: ${product.title}`, `
-              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden;">
-                <div style="background: #7c3aed; padding: 40px; text-align: center; color: white;">
-                  <h1 style="margin: 0; font-size: 24px;">Order Confirmed!</h1>
-                  <p style="opacity: 0.9;">Your digital archive is ready for download.</p>
-                </div>
-                <div style="padding: 40px;">
-                  <h2 style="color: #0f172a; margin-top: 0;">Hi ${user.name},</h2>
-                  <p style="color: #64748b; line-height: 1.6;">Thank you for your purchase from <strong>DigiExpo</strong>. Your payment was successful, and your professional digital assets are now available.</p>
-                  
-                  <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin: 30px 0;">
-                    <strong style="color: #1e293b; display: block; margin-bottom: 5px;">${product.title}</strong>
-                    <span style="color: #94a3b8; font-size: 0.9rem;">Order ID: ${transaction.orderId}</span>
-                  </div>
-
-                  <a href="${downloadUrl}" style="display: block; background: #7c3aed; color: white; text-align: center; padding: 18px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);">Download Files Now</a>
-                  
-                  <p style="margin-top: 30px; font-size: 0.85rem; color: #94a3b8; text-align: center;">You can also access this file anytime from your <a href="${frontendUrl}/dashboard" style="color: #7c3aed;">User Dashboard</a>.</p>
-                </div>
-              </div>
-            `);
-            console.log('✅ [SIMULATION] Purchase email sent successfully.');
-          } catch (mailErr) {
-            console.log('❌ [SIMULATION] Email sending failed but order is saved:', mailErr.message);
-          }
-        } else {
-          console.log('❌ [SIMULATION] User or Product record missing for delivery.', { user: !!user, product: !!product });
-        }
-      }
-      return res.status(200).json({ message: "Transaction successful (Simulated)", success: true });
-    }
 
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSign = crypto
