@@ -13,12 +13,14 @@ async function getProduct(id: string) {
   }
 }
 
-export default async function CheckoutPage({ searchParams }: { searchParams: { id?: string } }) {
-  if (!searchParams.id) {
+export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
+  const { id } = await searchParams;
+  
+  if (!id) {
     notFound();
   }
 
-  const product = await getProduct(searchParams.id);
+  const product = await getProduct(id);
   
   if (!product) {
     notFound();
