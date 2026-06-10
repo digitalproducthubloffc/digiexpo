@@ -11,13 +11,8 @@ interface Props {
 export default function BuyNowButton({ productId, price, externalPurchaseLink }: Props) {
 
   const handleBuyNow = () => {
-    if (externalPurchaseLink) {
-      // Redirect to external platform (Gumroad, Payhip, etc.)
-      window.open(externalPurchaseLink, '_blank', 'noopener,noreferrer');
-    } else {
-      // Fallback if no link is provided
-      alert("Online payments are currently disabled. Please contact support to purchase this item.");
-    }
+    // Always route to our checkout flow to let user choose currency
+    window.location.href = `/checkout?id=${productId}`;
   };
 
   return (

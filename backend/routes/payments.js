@@ -29,11 +29,25 @@ const paymentLimiter = rateLimit({
  * 1. CREATE ORDER (Initiation)
  */
 router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => {
-  const { productId, amount, currency = 'INR', guestInfo } = req.body;
+  const { productId, currency = 'INR', guestInfo } = req.body;
   const clientIp = requestIp.getClientIp(req);
   let userId = req.user ? req.user.userId : null;
 
   try {
+    // 1. SECURE AMOUNT CALCULATION
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found.' });
+    }
+    
+    // Calculate final price strictly on backend
+    let finalAmount = 0;
+    if (currency === 'INR') {
+      finalAmount = product.priceINR > 0 ? product.priceINR : product.realPrice * 85;
+    } else {
+      finalAmount = product.realPrice; // USD
+    }
+
     // If guest and no userId, check if email already exists or create temp account
     if (!userId && guestInfo) {
       let user = await User.findOne({ email: guestInfo.email });
@@ -54,7 +68,7 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
     if (!userId) return res.status(400).json({ message: 'User ID or Guest Info required.' });
 
     // Handle 0 cost product
-    if (amount === 0) {
+    if (finalAmount === 0) {
       const transaction = new Transaction({
         orderId: `free_${Date.now()}`,
         userId,
@@ -74,7 +88,7 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
 
 
     const options = {
-      amount: Math.round(amount * 100), // convert to paise
+      amount: Math.round(finalAmount * 100), // convert to paise
       currency,
       receipt: `receipt_${Date.now()}`,
       notes: { productId, userId, ip: clientIp }
@@ -87,7 +101,7 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
       orderId: order.id,
       userId,
       productId,
-      amount,
+      amount: finalAmount,
       currency,
       ip: clientIp,
       logs: [{ event: 'Created Razorpay Order', metadata: { orderId: order.id, notes: options.notes } }]
@@ -159,7 +173,7 @@ router.post('/verify', optionalVerifyToken, async (req, res) => {
 
                   <a href="${downloadUrl}" style="display: block; background: #7c3aed; color: white; text-align: center; padding: 18px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);">Download Files Now</a>
                   
-                  <p style="margin-top: 30px; font-size: 0.85rem; color: #94a3b8; text-align: center;">You can also access this file anytime from your <a href="http://localhost:3000/dashboard" style="color: #7c3aed;">User Dashboard</a>.</p>
+                  <p style="margin-top: 30px; font-size: 0.85rem; color: #94a3b8; text-align: center;">You can also access this file anytime from your <a href="${frontendUrl}/dashboard" style="color: #7c3aed;">User Dashboard</a>.</p>
                 </div>
               </div>
             `);
