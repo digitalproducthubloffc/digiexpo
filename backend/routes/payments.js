@@ -112,7 +112,8 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
     res.json(order);
   } catch (err) {
     console.error('Payment order creation failed:', err);
-    res.status(500).json({ message: 'Order initiation failed. Check keys/network.' });
+    const errorMessage = err.message || err.description || err.error?.description || 'Order initiation failed. Check keys/network.';
+    res.status(500).json({ message: errorMessage });
   }
 });
 
