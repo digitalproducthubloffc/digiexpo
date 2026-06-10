@@ -3,12 +3,11 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CheckoutFlow from '@/components/CheckoutFlow';
 
+import { fetchProductById } from '@/lib/api';
+
 async function getProduct(id: string) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7001/api';
   try {
-    const res = await fetch(`${API_URL}/products/${id}`, { cache: 'no-store' });
-    if (!res.ok) return null;
-    return await res.json();
+    return await fetchProductById(id);
   } catch (err) {
     return null;
   }
