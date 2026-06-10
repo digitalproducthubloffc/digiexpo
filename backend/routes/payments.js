@@ -12,8 +12,8 @@ const sendEmail = require('../utils/mailer');
 
 // Init Razorpay (keys should be in .env)
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_mock_123',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'mock_secret_abc'
+  key_id: (process.env.RAZORPAY_KEY_ID || 'rzp_test_mock_123').trim(),
+  key_secret: (process.env.RAZORPAY_KEY_SECRET || 'mock_secret_abc').trim()
 });
 
 // Rate limiting for payment attempts (Security: Prevent abuse)
@@ -129,7 +129,7 @@ router.post('/verify', optionalVerifyToken, async (req, res) => {
 
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSign = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || 'mock_secret_abc')
+      .createHmac("sha256", (process.env.RAZORPAY_KEY_SECRET || 'mock_secret_abc').trim())
       .update(sign.toString())
       .digest("hex");
 
