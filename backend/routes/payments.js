@@ -12,8 +12,18 @@ const sendEmail = require('../utils/mailer');
 
 // Init Razorpay (keys should be in .env)
 const razorpay = new Razorpay({
-  key_id: (process.env.RAZORPAY_KEY_ID || 'rzp_test_mock_123').trim(),
-  key_secret: (process.env.RAZORPAY_KEY_SECRET || 'mock_secret_abc').trim()
+  key_id: (process.env.RAZORPAY_KEY_ID || 'rzp_test_mock_123').trim().replace(/['"]/g, ''),
+  key_secret: (process.env.RAZORPAY_KEY_SECRET || 'mock_secret_abc').trim().replace(/['"]/g, '')
+});
+
+router.get('/test-keys', (req, res) => {
+  const kid = process.env.RAZORPAY_KEY_ID || '';
+  const ksec = process.env.RAZORPAY_KEY_SECRET || '';
+  res.json({
+    message: "Key Check",
+    key_id: kid ? `${kid.substring(0, 15)}... length:${kid.length}` : 'MISSING',
+    key_secret: ksec ? `${ksec.substring(0, 3)}... length:${ksec.length}` : 'MISSING'
+  });
 });
 
 // Rate limiting for payment attempts (Security: Prevent abuse)
