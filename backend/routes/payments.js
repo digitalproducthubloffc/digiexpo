@@ -107,6 +107,13 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
     console.log('--- RAZORPAY DIAGNOSTICS ---');
     console.log('Attempting to create order with options:', JSON.stringify(options));
     
+    console.log('--- KEY DIAGNOSTICS ---');
+    console.log({
+      keyId: process.env.RAZORPAY_KEY_ID?.substring(0, 15),
+      secretLength: process.env.RAZORPAY_KEY_SECRET?.length
+    });
+    console.log('-----------------------');
+
     const order = await razorpay.orders.create(options);
 
     console.log('Order created successfully:', order.id);
