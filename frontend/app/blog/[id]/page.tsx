@@ -55,7 +55,7 @@ export default function BlogPostPage() {
         </div>
 
         <div className={styles.content}>
-          {blog.content.split('\n').map((para: string, i: number) => (
+          {(blog.content || '').split('\n').map((para: string, i: number) => (
             para.trim() ? <p key={i}>{para}</p> : <br key={i} />
           ))}
         </div>
@@ -64,9 +64,11 @@ export default function BlogPostPage() {
           <div className={styles.mediaSection}>
             <h3>Gallery & Resources</h3>
             <div className={styles.mediaGrid}>
-              {blog.media.map((m: string, i: number) => {
-                const isVideo = m.match(/\.(mp4|webm|ogg)$/i);
-                const fullUrl = m.startsWith('http') ? m : `${BASE_URL}${m}`;
+              {blog.media.map((m: any, i: number) => {
+                const url = typeof m === 'string' ? m : m.url;
+                if (!url) return null;
+                const isVideo = m.type === 'video' || url.match(/\.(mp4|webm|ogg)$/i);
+                const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
                 return (
                   <div key={i} className={styles.mediaItem}>
                     {isVideo ? (
