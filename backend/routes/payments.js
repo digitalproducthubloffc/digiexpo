@@ -96,7 +96,7 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
       return res.json({ id: transaction.orderId, free: true });
     }
 
-
+    // 2. CREATE RAZORPAY ORDER
     const options = {
       amount: Math.round(finalAmount * 100), // convert to paise
       currency,
@@ -104,7 +104,13 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
       notes: { productId, userId, ip: clientIp }
     };
 
+    console.log('--- RAZORPAY DIAGNOSTICS ---');
+    console.log('Attempting to create order with options:', JSON.stringify(options));
+    
     const order = await razorpay.orders.create(options);
+
+    console.log('Order created successfully:', order.id);
+    console.log('----------------------------');
 
     // Initial log entry (Audit Trail)
     const transaction = new Transaction({
@@ -121,7 +127,9 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
 
     res.json(order);
   } catch (err) {
-    console.error('Payment order creation failed:', err);
+    console.log('--- RAZORPAY ERROR ---');
+    console.error('Razorpay SDK threw an error:', err);
+    console.log('----------------------');
     const errorMessage = err.message || err.description || err.error?.description || 'Order initiation failed. Check keys/network.';
     res.status(500).json({ message: errorMessage });
   }
