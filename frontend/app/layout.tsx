@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   description: "Discover curated digital assets, sketches, and plans in a high-end marketplace.",
 };
 
+import Script from "next/script";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning={true}>
       <body>
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="beforeInteractive" />
         <CustomCursor />
         {children}
         <AIAssistant />
