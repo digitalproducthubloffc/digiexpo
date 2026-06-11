@@ -76,8 +76,17 @@ export default function PaymentForm({ product }: { product: any }) {
         })
       });
 
+      console.log('--- BROWSER PAYMENT DIAGNOSTICS ---');
+      console.log('Backend response status:', orderRes.status);
+      
       const orderData = await orderRes.json();
-      if (!orderRes.ok) throw new Error(orderData.message || 'Order initiation failed.');
+      console.log('Backend response data:', orderData);
+      
+      if (!orderRes.ok) {
+        console.error('Backend rejected order creation. This is usually due to Razorpay KYC lock or invalid keys.');
+        console.error('Full Error Object:', orderData);
+        throw new Error(orderData.message || 'Order initiation failed.');
+      }
 
       if (orderData.free) {
         router.push(`/order-success?productId=${product._id}`);
