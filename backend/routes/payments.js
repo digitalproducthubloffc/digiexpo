@@ -53,9 +53,13 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
     // Calculate final price strictly on backend
     let finalAmount = 0;
     if (currency === 'INR') {
-      finalAmount = product.priceINR > 0 ? product.priceINR : product.realPrice * 85;
+      const basePrice = product.priceINR > 0 ? product.priceINR : product.realPrice * 85;
+      const platformFeeINR = 25;
+      finalAmount = basePrice + platformFeeINR;
     } else {
-      finalAmount = product.realPrice; // USD
+      const basePrice = product.realPrice;
+      const platformFeeUSD = 0.30;
+      finalAmount = basePrice + platformFeeUSD;
     }
 
     // If guest and no userId, check if email already exists or create temp account
