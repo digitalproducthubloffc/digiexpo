@@ -46,6 +46,7 @@ const blogRoutes = require('./routes/blogs');
 const userRoutes = require('./routes/user');
 const affiliateRoutes = require('./routes/affiliates');
 const chatRoutes = require('./routes/chat');
+const transactionRoutes = require('./routes/transactions');
 
 app.use('/api/products', productRoutes);
 app.use('/api/payments', paymentRoutes);
@@ -56,6 +57,7 @@ app.use('/api/blogs', blogRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/affiliates', affiliateRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/transactions', transactionRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {

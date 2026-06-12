@@ -3,18 +3,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, fetchAllChats, fetchChatById, adminReplyChat, adminMarkChatRead, adminCloseChat, BASE_URL } from '@/lib/api';
-import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye, MessageCircle, Send, Paperclip } from 'lucide-react';
+import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, fetchAllChats, fetchChatById, adminReplyChat, adminMarkChatRead, adminCloseChat, fetchTransactions, BASE_URL } from '@/lib/api';
+import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye, MessageCircle, Send, Paperclip, DownloadCloud, Activity } from 'lucide-react';
 import styles from './dashboard.module.css';
 
 export default function AdminDashboard() {
   const [token, setToken] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates' | 'messages'>('analytics');
+  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates' | 'messages' | 'transactions'>('analytics');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [allBlogs, setAllBlogs] = useState<any[]>([]);
   const [affiliateApps, setAffiliateApps] = useState<any[]>([]);
+  const [allTransactions, setAllTransactions] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [countryStats, setCountryStats] = useState<any>({ salesByCountry: [], viewsByCountry: [] });
 
@@ -71,18 +72,20 @@ export default function AdminDashboard() {
 
   const loadDashboardData = async (t: string) => {
     try {
-      const [prods, blogs, s, cs, apps] = await Promise.all([
+      const [prods, blogs, s, cs, apps, trans] = await Promise.all([
         fetchProducts(),
         fetchBlogs(),
         fetchStats(t),
         fetchSalesByCountry(t),
-        fetchAffiliateApplications(t)
+        fetchAffiliateApplications(t),
+        fetchTransactions(t)
       ]);
       setAllProducts(prods);
       setAllBlogs(blogs);
       setStats(s);
       setCountryStats(cs);
       setAffiliateApps(apps);
+      setAllTransactions(trans);
     } catch (err) {
       console.error(err);
     }
@@ -149,6 +152,31 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const exportTransactionsToCSV = () => {
+    if (allTransactions.length === 0) return;
+    const headers = ['Order ID', 'Date', 'Customer Email', 'Customer Name', 'Product', 'Amount ($)', 'Status'];
+    const rows = allTransactions.map(t => [
+      t.orderId,
+      new Date(t.createdAt).toLocaleDateString(),
+      t.userId?.email || 'Guest',
+      t.userId?.name || 'Unknown',
+      t.productId?.title || 'Unknown Product',
+      t.amount,
+      t.status.toUpperCase()
+    ]);
+    
+    let csvContent = "data:text/csv;charset=utf-8," 
+      + [headers, ...rows].map(e => e.join(",")).join("\n");
+      
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `digiexpo_transactions_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
   const handleProductSubmit = async (e: React.FormEvent) => {
@@ -244,6 +272,9 @@ export default function AdminDashboard() {
                   {allChats.filter(c => c.messages?.some((m: any) => m.sender === 'user' && !m.readByAdmin)).length}
                 </span>
               )}
+            </button>
+            <button className={activeTab === 'transactions' ? styles.active : ''} onClick={() => setActiveTab('transactions')}>
+              <Activity size={20} /> Ledger / Sales
             </button>
           </nav>
 
@@ -717,6 +748,60 @@ export default function AdminDashboard() {
                     </>
                   )}
                 </div>
+              </div>
+            </div>
+          )}
+          {activeTab === 'transactions' && (
+            <div className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <span className={styles.sub}>FINANCIAL RECORD</span>
+                  <h2>Transaction Ledger</h2>
+                </div>
+                <button onClick={exportTransactionsToCSV} className={styles.primaryBtn} style={{ gap: '8px' }}>
+                  <DownloadCloud size={18} /> Export to CSV
+                </button>
+              </div>
+
+              <div className={styles.tableWrapper}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Order ID</th>
+                      <th>Customer Email</th>
+                      <th>Product</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allTransactions.map((tx: any, i: number) => (
+                      <tr key={i}>
+                        <td>{new Date(tx.createdAt).toLocaleDateString()}</td>
+                        <td style={{ fontFamily: 'monospace', color: '#64748b' }}>{tx.orderId}</td>
+                        <td>{tx.userId?.email || 'Guest User'}</td>
+                        <td>{tx.productId?.title || 'Unknown Asset'}</td>
+                        <td style={{ fontWeight: 'bold' }}>${tx.amount.toFixed(2)}</td>
+                        <td>
+                          <span style={{
+                            padding: '4px 10px',
+                            borderRadius: '20px',
+                            fontSize: '0.8rem',
+                            fontWeight: 'bold',
+                            backgroundColor: tx.status === 'completed' ? '#ecfdf5' : (tx.status === 'failed' ? '#fef2f2' : '#fffbeb'),
+                            color: tx.status === 'completed' ? '#10b981' : (tx.status === 'failed' ? '#ef4444' : '#f59e0b')
+                          }}>
+                            {tx.status.toUpperCase()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    {allTransactions.length === 0 && (
+                      <tr><td colSpan={6} style={{ textAlign: 'center', padding: '30px' }}>No transactions recorded yet.</td></tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}

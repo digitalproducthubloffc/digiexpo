@@ -225,6 +225,16 @@ export async function approveAffiliateApplication(id: string, token: string) {
   return res.json();
 }
 
+// ───── Transactions API ─────
+
+export async function fetchTransactions(token: string) {
+  const res = await fetch(`${API_URL}/transactions`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch transactions');
+  return res.json();
+}
+
 // ───── Chat API ─────
 
 export async function fetchMyChat(token: string) {
