@@ -469,15 +469,16 @@ export default function AdminDashboard() {
                   <div className={styles.metaCol}>
                     <div className={styles.inputGroup}><label>Title</label><input type="text" value={fields.title} onChange={e => setFields({...fields, title: e.target.value})} required /></div>
                     <div className={styles.fieldPair}>
-                      <div className={styles.inputGroup}><label>Price ($)</label><input type="number" value={fields.realPrice} onChange={e => setFields({...fields, realPrice: e.target.value})} required /></div>
-                      <div className={styles.inputGroup}>
-                        <label>Product Type</label>
-                        <select value={fields.type} onChange={e => setFields({...fields, type: e.target.value})} style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(124, 58, 237, 0.2)', outline: 'none', background: '#f8fafc', color: '#1e293b', fontSize: '0.95rem' }}>
-                          <option value="Notion Template">Notion Template</option>
-                          <option value="Drawings/Sketch">Drawings / Sketch</option>
-                          <option value="Website/Portfolio">Website / Portfolio</option>
-                        </select>
-                      </div>
+                      <div className={styles.inputGroup}><label>Actual Price ($)</label><input type="number" value={fields.originalPrice} onChange={e => setFields({...fields, originalPrice: e.target.value})} required /></div>
+                      <div className={styles.inputGroup}><label>Discounted Price ($)</label><input type="number" value={fields.realPrice} onChange={e => setFields({...fields, realPrice: e.target.value})} required /></div>
+                    </div>
+                    <div className={styles.inputGroup} style={{ marginBottom: '15px' }}>
+                      <label>Product Type</label>
+                      <select value={fields.type} onChange={e => setFields({...fields, type: e.target.value})} style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(124, 58, 237, 0.2)', outline: 'none', background: '#f8fafc', color: '#1e293b', fontSize: '0.95rem' }}>
+                        <option value="Notion Template">Notion Template</option>
+                        <option value="Drawings/Sketch">Drawings / Sketch</option>
+                        <option value="Website/Portfolio">Website / Portfolio</option>
+                      </select>
                     </div>
                     {fields.type === 'Website/Portfolio' && (
                       <div className={styles.fieldPair} style={{ marginBottom: '15px' }}>

@@ -75,10 +75,15 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             </div>
 
             <div className={styles.priceBox}>
-               <div className={styles.priceRow}>
+               <div className={styles.priceRow} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                  <span className={styles.price}>${product.realPrice?.toFixed(2)}</span>
                  {product.originalPrice > product.realPrice && (
-                   <span className={styles.originalPrice}>${product.originalPrice?.toFixed(2)}</span>
+                   <>
+                     <span className={styles.originalPrice}>${product.originalPrice?.toFixed(2)}</span>
+                     <span style={{ background: '#ecfdf5', color: '#10b981', padding: '4px 10px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                       {Math.round(((product.originalPrice - product.realPrice) / product.originalPrice) * 100)}% OFF
+                     </span>
+                   </>
                  )}
                </div>
                <div className={styles.metaRow}>

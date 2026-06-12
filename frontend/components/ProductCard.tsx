@@ -83,7 +83,14 @@ export default function ProductCard({ _id, title, category, image, realPrice, de
         <Link href={`/product/${_id}`} className={styles.imageLink}>
           <img src={image} alt={title} className={styles.productImage} />
         </Link>
-        {isNew && <span className={styles.newBadge}>NEW</span>}
+        <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 5 }}>
+          {isNew && <span className={styles.newBadge}>NEW</span>}
+          {originalPrice > realPrice && (
+            <span style={{ background: '#ef4444', color: 'white', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold', boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)' }}>
+              {Math.round(((originalPrice - realPrice) / originalPrice) * 100)}% OFF
+            </span>
+          )}
+        </div>
         
         {/* Hover Heart Action - Only render on client to avoid hydration issues */}
         {isMounted && (
