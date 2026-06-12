@@ -121,6 +121,20 @@ export default function PaymentForm({ product }: { product: any }) {
         theme: { color: "#7c3aed" }
       };
       const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', async function (response: any) {
+        try {
+          await fetch(`${API_URL}/payments/fail`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              order_id: response.error.metadata.order_id, 
+              error_description: response.error.description 
+            })
+          });
+        } catch(e) {}
+        setError(response.error.description || "Payment failed");
+        setIsProcessing(false);
+      });
       rzp.open();
     } catch (err: any) {
       setError(err.message);

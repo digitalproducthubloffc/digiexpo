@@ -147,7 +147,25 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
 });
 
 /**
- * 2. VERIFY SIGNATURE (Client Side confirmation)
+ * 2. MARK ORDER AS FAILED
+ */
+router.post('/fail', optionalVerifyToken, async (req, res) => {
+  const { order_id, error_description } = req.body;
+  try {
+    const transaction = await Transaction.findOne({ orderId: order_id });
+    if (transaction && transaction.status !== 'completed') {
+      transaction.status = 'failed';
+      transaction.logs.push({ event: 'Payment Failed', metadata: { error: error_description } });
+      await transaction.save();
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/**
+ * 3. VERIFY SIGNATURE (Client Side confirmation)
  */
 router.post('/verify', optionalVerifyToken, async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
