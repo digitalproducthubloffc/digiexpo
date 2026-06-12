@@ -6,7 +6,7 @@ import WishlistButton from '@/components/WishlistButton';
 import ProductReviews from '@/components/ProductReviews';
 import RecentViewTracker from '@/components/RecentViewTracker';
 import { fetchProductById, fetchProducts } from '@/lib/api';
-import { Check, Star, FileText, HardDrive, Download } from 'lucide-react';
+import { Check, Star, FileText, HardDrive, Download, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import BuyNowButton from '@/components/BuyNowButton';
 import ProductChatSection from '@/components/ProductChatSection';
@@ -95,8 +95,19 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <div className={styles.actionButtons}>
                <BuyNowButton productId={product._id} price={product.realPrice} externalPurchaseLink={product.externalPurchaseLink} />
                <WishlistButton productId={product._id} title={product.title} />
+               {product.websiteLink && (
+                 <a href={product.websiteLink} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', background: '#f8fafc', color: '#1e293b', border: '1px solid #e2e8f0', borderRadius: '12px', fontWeight: '600', textDecoration: 'none', transition: 'all 0.2s', marginTop: '10px' }}>
+                   <ExternalLink size={18} /> Live Preview
+                 </a>
+               )}
                <ProductChatSection productId={product._id} />
             </div>
+
+            {product.customizationAvailable && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', background: 'rgba(124, 58, 237, 0.08)', border: '1px solid rgba(124, 58, 237, 0.2)', borderRadius: '12px', color: '#7c3aed', fontWeight: '600', marginTop: '20px', fontSize: '0.9rem' }}>
+                 ✨ Customization Available upon Request
+              </div>
+            )}
 
             <div className={styles.descriptionBox}>
                <h4>DESCRIPTION</h4>

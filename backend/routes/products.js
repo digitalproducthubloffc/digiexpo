@@ -47,7 +47,7 @@ router.post('/', verifyAdmin, upload.fields([
   console.log('--- POST /api/products request received ---');
   console.log('req.body:', req.body);
   console.log('req.files:', req.files);
-  const { title, description, originalPrice, realPrice, priceINR, category, details, tags, postPurchase, externalPurchaseLink } = req.body;
+  const { title, description, originalPrice, realPrice, priceINR, category, type, websiteLink, customizationAvailable, details, tags, postPurchase, externalPurchaseLink } = req.body;
 
   // Basic validation of required fields
   if (!title || !description || !originalPrice || !realPrice || !category) {
@@ -126,6 +126,9 @@ router.post('/', verifyAdmin, upload.fields([
       realPrice: Number(realPrice),
       priceINR: Number(priceINR || 0),
       category,
+      type: type || 'Other',
+      websiteLink: websiteLink || '',
+      customizationAvailable: customizationAvailable === 'true',
       fileType: fileType || 'PDF',
       fileSize: fileSize || '',
       postPurchase: parsedPostPurchase,

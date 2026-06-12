@@ -24,6 +24,9 @@ const productSchema = new mongoose.Schema({
   realPrice: { type: Number, required: true }, // Discounted price (USD)
   priceINR: { type: Number, default: 0 }, // Regional pricing for India
   category: { type: String, required: true },
+  type: { type: String, enum: ['Notion Template', 'Drawings/Sketch', 'Website/Portfolio', 'Other'], default: 'Other' },
+  websiteLink: { type: String, default: '' },
+  customizationAvailable: { type: Boolean, default: false },
   fileUrl: { type: String }, // For digital downloads
   fileType: { type: String, default: 'PDF' },
   fileSize: { type: String, default: '5.2 MB' },
