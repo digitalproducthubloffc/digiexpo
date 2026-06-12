@@ -16,7 +16,7 @@ interface ProductProps {
   isNew?: boolean;
 }
 
-export default function ProductCard({ _id, title, category, image, realPrice, description, isNew }: ProductProps) {
+export default function ProductCard({ _id, title, category, image, originalPrice, realPrice, description, isNew }: ProductProps) {
   const [wishlisted, setWishlisted] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
