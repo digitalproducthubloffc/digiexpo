@@ -48,12 +48,17 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
         <div className={styles.productHero}>
           {/* Left: Interactive Gallery */}
-          <div className={styles.visuals}>
+          <div className={styles.visuals} style={{ position: 'relative' }}>
             <ProductGallery 
               thumbnail={product.image} 
               gallery={galleryImages} 
               title={product.title} 
             />
+            {product.type === 'Website/Portfolio' && product.websiteLink && (
+              <a href={product.websiteLink} target="_blank" rel="noreferrer" style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '10px 20px', borderRadius: '30px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', backdropFilter: 'blur(8px)', transition: 'all 0.2s', zIndex: 10, boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} onMouseOver={(e) => e.currentTarget.style.background='rgba(0,0,0,0.8)'} onMouseOut={(e) => e.currentTarget.style.background='rgba(0,0,0,0.6)'}>
+                <ExternalLink size={16} /> Visit Website
+              </a>
+            )}
           </div>
 
           {/* Right: Product Info */}
@@ -93,14 +98,22 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             </div>
 
             <div className={styles.actionButtons}>
-               <BuyNowButton productId={product._id} price={product.realPrice} externalPurchaseLink={product.externalPurchaseLink} />
+               {product.type === 'Website/Portfolio' && product.customizationAvailable ? (
+                 <button onClick={() => document.getElementById('product-chat')?.scrollIntoView({ behavior: 'smooth' })} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '16px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: '600', transition: 'all 0.2s', fontSize: '1.05rem', cursor: 'pointer' }}>
+                   Contact Seller to Buy/Customize
+                 </button>
+               ) : (
+                 <BuyNowButton productId={product._id} price={product.realPrice} externalPurchaseLink={product.externalPurchaseLink} />
+               )}
                <WishlistButton productId={product._id} title={product.title} />
                {product.websiteLink && (
                  <a href={product.websiteLink} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', background: '#f8fafc', color: '#1e293b', border: '1px solid #e2e8f0', borderRadius: '12px', fontWeight: '600', textDecoration: 'none', transition: 'all 0.2s', marginTop: '10px' }}>
                    <ExternalLink size={18} /> Live Preview
                  </a>
                )}
-               <ProductChatSection productId={product._id} />
+               <div id="product-chat">
+                 <ProductChatSection productId={product._id} />
+               </div>
             </div>
 
             {product.customizationAvailable && (
