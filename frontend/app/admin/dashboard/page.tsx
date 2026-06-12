@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, fetchAllChats, fetchChatById, adminReplyChat, adminMarkChatRead, adminCloseChat, fetchTransactions, BASE_URL } from '@/lib/api';
-import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye, MessageCircle, Send, Paperclip, DownloadCloud, Activity } from 'lucide-react';
+import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, fetchAllChats, fetchChatById, adminReplyChat, adminMarkChatRead, adminCloseChat, fetchTransactions, addReview, BASE_URL } from '@/lib/api';
+import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye, MessageCircle, Send, Paperclip, DownloadCloud, Activity, Star } from 'lucide-react';
 import styles from './dashboard.module.css';
 
 export default function AdminDashboard() {
   const [token, setToken] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates' | 'messages' | 'transactions'>('analytics');
+  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates' | 'messages' | 'transactions' | 'reviews'>('analytics');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -18,6 +18,8 @@ export default function AdminDashboard() {
   const [allTransactions, setAllTransactions] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [countryStats, setCountryStats] = useState<any>({ salesByCountry: [], viewsByCountry: [] });
+
+  const [reviewForm, setReviewForm] = useState({ productId: '', name: '', rating: 5, comment: '' });
 
   // Chat States
   const [allChats, setAllChats] = useState<any[]>([]);
@@ -210,6 +212,22 @@ export default function AdminDashboard() {
     } catch (err: any) { setStatus(`❌ ${err.message}`); } finally { setLoading(false); }
   };
 
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token || !reviewForm.productId) return;
+    setLoading(true);
+    setStatus('');
+    try {
+      await addReview(reviewForm.productId, reviewForm.rating, reviewForm.comment, token, reviewForm.name);
+      setStatus('✅ Testimonial published successfully!');
+      setReviewForm({ productId: '', name: '', rating: 5, comment: '' });
+    } catch (err: any) {
+      setStatus(`❌ ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleBlogSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
@@ -275,6 +293,9 @@ export default function AdminDashboard() {
             </button>
             <button className={activeTab === 'transactions' ? styles.active : ''} onClick={() => setActiveTab('transactions')}>
               <Activity size={20} /> Ledger / Sales
+            </button>
+            <button className={activeTab === 'reviews' ? styles.active : ''} onClick={() => setActiveTab('reviews')}>
+              <Star size={20} /> Testimonials
             </button>
           </nav>
 
@@ -803,6 +824,57 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+          {activeTab === 'reviews' && (
+            <div className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <span className={styles.sub}>SOCIAL PROOF</span>
+                  <h2>Publish Testimonials</h2>
+                </div>
+              </div>
+              <form onSubmit={handleReviewSubmit} className={styles.formCard}>
+                <div className={styles.inputGroup}>
+                  <label>Select Product</label>
+                  <select 
+                    required
+                    value={reviewForm.productId} 
+                    onChange={e => setReviewForm({...reviewForm, productId: e.target.value})}
+                    style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(124, 58, 237, 0.2)', outline: 'none', background: '#f8fafc' }}
+                  >
+                    <option value="">-- Choose Product --</option>
+                    {allProducts.map(p => <option key={p._id} value={p._id}>{p.title}</option>)}
+                  </select>
+                </div>
+                <div className={styles.fieldPair}>
+                  <div className={styles.inputGroup}>
+                    <label>Reviewer Name</label>
+                    <input type="text" placeholder="E.g. Sarah Jenkins" value={reviewForm.name} onChange={e => setReviewForm({...reviewForm, name: e.target.value})} required />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label>Star Rating</label>
+                    <select 
+                      value={reviewForm.rating} 
+                      onChange={e => setReviewForm({...reviewForm, rating: Number(e.target.value)})}
+                      style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', border: '1px solid rgba(124, 58, 237, 0.2)', outline: 'none', background: '#f8fafc' }}
+                    >
+                      <option value={5}>⭐⭐⭐⭐⭐ (5 Stars)</option>
+                      <option value={4}>⭐⭐⭐⭐ (4 Stars)</option>
+                      <option value={3}>⭐⭐⭐ (3 Stars)</option>
+                      <option value={2}>⭐⭐ (2 Stars)</option>
+                      <option value={1}>⭐ (1 Star)</option>
+                    </select>
+                  </div>
+                </div>
+                <div className={styles.inputGroup}>
+                  <label>Review Message</label>
+                  <textarea rows={4} placeholder="Type the review text here..." value={reviewForm.comment} onChange={e => setReviewForm({...reviewForm, comment: e.target.value})} required />
+                </div>
+                <button type="submit" disabled={loading} className={styles.primaryBtn} style={{ marginTop: '10px' }}>
+                  {loading ? 'Publishing...' : 'Publish Testimonial'}
+                </button>
+              </form>
             </div>
           )}
         </main>
