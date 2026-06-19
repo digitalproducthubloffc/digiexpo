@@ -24,7 +24,14 @@ export default function BecomeSeller() {
       localStorage.setItem('user', JSON.stringify(res.user));
       router.push('/seller/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Failed to upgrade account');
+      if (err.message === 'Unauthorized') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('user');
+        router.push('/login?redirect=/seller/signup');
+      } else {
+        setError(err.message || 'Failed to upgrade account');
+      }
     }
     setLoading(false);
   };

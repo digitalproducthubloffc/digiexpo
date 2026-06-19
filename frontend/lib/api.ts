@@ -280,7 +280,11 @@ export async function becomeSeller(token: string) {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` }
   });
-  if (!res.ok) throw new Error('Failed to upgrade to seller');
+  if (!res.ok) {
+    if (res.status === 401) throw new Error('Unauthorized');
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || 'Failed to upgrade to seller');
+  }
   return res.json();
 }
 
