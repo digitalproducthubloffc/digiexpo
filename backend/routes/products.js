@@ -26,7 +26,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-const { verifyAdmin, verifyToken } = require('./auth');
+const { verifyAdmin, verifyToken, verifySellerOrAdmin } = require('./auth');
 const multer = require('multer');
 const path = require('path');
 
@@ -37,8 +37,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Admin add product with file upload
-router.post('/', verifyAdmin, upload.fields([
+// Admin or Seller add product with file upload
+router.post('/', verifySellerOrAdmin, upload.fields([
   { name: 'thumbnail', maxCount: 1 },
   { name: 'gallery', maxCount: 10 },
   { name: 'digitalFile', maxCount: 1 },
@@ -47,7 +47,7 @@ router.post('/', verifyAdmin, upload.fields([
   console.log('--- POST /api/products request received ---');
   console.log('req.body:', req.body);
   console.log('req.files:', req.files);
-  const { title, description, originalPrice, realPrice, priceINR, category, type, websiteLink, customizationAvailable, details, tags, postPurchase, externalPurchaseLink } = req.body;
+  const { title, description, originalPrice, realPrice, priceINR, category, type, websiteLink, customizationAvailable, details, tags, postPurchase, externalPurchaseLink, affiliateShare, termsAndConditions } = req.body;
 
   // Basic validation of required fields
   if (!title || !description || !originalPrice || !realPrice || !category) {
@@ -132,7 +132,10 @@ router.post('/', verifyAdmin, upload.fields([
       fileType: fileType || 'PDF',
       fileSize: fileSize || '',
       postPurchase: parsedPostPurchase,
-      externalPurchaseLink: externalPurchaseLink || ''
+      externalPurchaseLink: externalPurchaseLink || '',
+      sellerId: req.user && !req.user.admin ? req.user.userId : null,
+      affiliateShare: Number(affiliateShare || 0),
+      termsAndConditions: termsAndConditions || ''
     });
 
     await product.save();

@@ -18,7 +18,20 @@ const userSchema = new mongoose.Schema({
     discoverySource: String,
     knowsDigitalCreation: String
   },
-  role: { type: String, enum: ['user', 'affiliate'], default: 'user' },
+  role: { type: String, enum: ['user', 'affiliate', 'seller', 'admin'], default: 'user' },
+  sellerProfile: {
+    bannerUrl: { type: String },
+    profileImage: { type: String },
+    bio: { type: String },
+    verificationTier: { type: String, enum: ['none', 'tier1', 'tier2', 'tier3'], default: 'none' }, // tier1=$5, tier2=$7, tier3=$10
+    paymentMethods: [{
+      type: { type: String, enum: ['bank', 'paypal'] },
+      details: { type: String }, // e.g. PayPal email or Bank Account string
+      isDefault: { type: Boolean, default: false }
+    }],
+    balance: { type: Number, default: 0 }, // Unwithdrawn earnings
+    totalEarned: { type: Number, default: 0 }
+  },
   createdAt: { type: Date, default: Date.now }
 });
 

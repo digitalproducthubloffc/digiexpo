@@ -37,27 +37,29 @@ app.use(async (req, res, next) => {
 });
 
 // Routes
-const productRoutes = require('./routes/products');
-const paymentRoutes = require('./routes/payments');
 const { authRouter } = require('./routes/auth');
-const analyticsRoutes = require('./routes/analytics');
-const supportRoutes = require('./routes/support');
-const blogRoutes = require('./routes/blogs');
+const productRouter = require('./routes/products');
+const paymentRouter = require('./routes/payments');
+const analyticsRouter = require('./routes/analytics');
+const blogRouter = require('./routes/blogs');
+const affiliateRouter = require('./routes/affiliates');
+const chatRouter = require('./routes/chat');
+const supportRouter = require('./routes/support');
+const transactionRouter = require('./routes/transactions');
+const sellerRouter = require('./routes/seller');
 const userRoutes = require('./routes/user');
-const affiliateRoutes = require('./routes/affiliates');
-const chatRoutes = require('./routes/chat');
-const transactionRoutes = require('./routes/transactions');
 
-app.use('/api/products', productRoutes);
-app.use('/api/payments', paymentRoutes);
 app.use('/api/auth', authRouter);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/support', supportRoutes);
-app.use('/api/blogs', blogRoutes);
+app.use('/api/products', productRouter);
+app.use('/api/payments', paymentRouter);
+app.use('/api/analytics', analyticsRouter);
+app.use('/api/blogs', blogRouter);
+app.use('/api/affiliates', affiliateRouter);
+app.use('/api/chat', chatRouter);
+app.use('/api/support', supportRouter);
+app.use('/api/transactions', transactionRouter);
+app.use('/api/seller', sellerRouter);
 app.use('/api/user', userRoutes);
-app.use('/api/affiliates', affiliateRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/transactions', transactionRoutes);
 
 // Basic Route
 app.get('/', (req, res) => {

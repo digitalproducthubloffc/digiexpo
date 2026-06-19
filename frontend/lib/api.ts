@@ -229,9 +229,58 @@ export async function approveAffiliateApplication(id: string, token: string) {
 
 export async function fetchTransactions(token: string) {
   const res = await fetch(`${API_URL}/transactions`, {
-    headers: { 'Authorization': `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) throw new Error('Failed to fetch transactions');
+  return res.json();
+}
+
+// ==================== SELLER API ====================
+
+export async function fetchSellerAnalytics(token: string, timeRange: string = 'all') {
+  const res = await fetch(`${API_URL}/seller/analytics?timeRange=${timeRange}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch seller analytics');
+  return res.json();
+}
+
+export async function addPaymentMethod(token: string, type: string, details: string) {
+  const res = await fetch(`${API_URL}/seller/payment-methods`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ type, details })
+  });
+  if (!res.ok) throw new Error('Failed to add payment method');
+  return res.json();
+}
+
+export async function purchaseVerification(token: string, tier: string, paymentId: string = 'simulated_txn') {
+  const res = await fetch(`${API_URL}/seller/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ tier, paymentId })
+  });
+  if (!res.ok) throw new Error('Failed to purchase verification');
+  return res.json();
+}
+
+export async function updateSellerProfile(token: string, bannerUrl: string, profileImage: string, bio: string) {
+  const res = await fetch(`${API_URL}/seller/profile`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ bannerUrl, profileImage, bio })
+  });
+  if (!res.ok) throw new Error('Failed to update seller profile');
+  return res.json();
+}
+
+export async function becomeSeller(token: string) {
+  const res = await fetch(`${API_URL}/user/become-seller`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to upgrade to seller');
   return res.json();
 }
 

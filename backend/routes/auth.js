@@ -32,7 +32,25 @@ const verifyAdmin = (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET || 'secret-key', (err, decoded) => {
     if (err) return res.status(401).json({ message: `Token error: ${err.message}` });
     if (!decoded || !decoded.admin) return res.status(401).json({ message: 'Admin access required' });
+    req.user = decoded;
     next();
+  });
+};
+
+// Admin OR Seller verify middleware
+const verifySellerOrAdmin = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(403).json({ message: 'No token provided' });
+  }
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token, process.env.JWT_SECRET || 'secret-key', (err, decoded) => {
+    if (err) return res.status(401).json({ message: `Token error: ${err.message}` });
+    if (decoded.admin || decoded.role === 'seller') {
+      req.user = decoded;
+      return next();
+    }
+    return res.status(401).json({ message: 'Seller or Admin access required' });
   });
 };
 
@@ -250,4 +268,4 @@ router.get('/profile', verifyToken, async (req, res) => {
   }
 });
 
-module.exports = { authRouter: router, verifyAdmin, verifyToken, optionalVerifyToken };
+module.exports = { authRouter: router, verifyAdmin, verifyToken, optionalVerifyToken, verifySellerOrAdmin };

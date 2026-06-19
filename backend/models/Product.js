@@ -20,6 +20,9 @@ const productSchema = new mongoose.Schema({
   image: { type: String, default: 'https://via.placeholder.com/300x300?text=No+Image', }, // Main image URL (optional)
 
   images: [{ type: String }], // Optional gallery
+  sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // The seller who owns this product
+  affiliateShare: { type: Number, default: 0 }, // e.g. 20 for 20%
+  termsAndConditions: { type: String, default: '' },
   originalPrice: { type: Number, required: true }, 
   realPrice: { type: Number, required: true }, // Discounted price (USD)
   priceINR: { type: Number, default: 0 }, // Regional pricing for India

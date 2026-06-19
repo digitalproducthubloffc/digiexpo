@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-  sender: { type: String, enum: ['user', 'admin'], required: true },
+  sender: { type: String, enum: ['user', 'admin', 'seller'], required: true },
   text: { type: String },
   mediaUrl: { type: String },   // URL to uploaded image/video
   mediaType: { type: String, enum: ['image', 'video'] },
@@ -14,6 +14,7 @@ const messageSchema = new mongoose.Schema({
 
 const chatSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // If chatting with a specific seller
   userName: { type: String, required: true },
   userEmail: { type: String, required: true },
   messages: [messageSchema],

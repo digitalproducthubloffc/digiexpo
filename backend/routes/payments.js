@@ -39,9 +39,9 @@ const paymentLimiter = rateLimit({
  * 1. CREATE ORDER (Initiation)
  */
 router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => {
-  const { productId, currency = 'INR', guestInfo } = req.body;
+  const { productId, currency = 'INR', guestInfo, affiliateId } = req.body;
+  let userId = req.user?.userId;
   const clientIp = requestIp.getClientIp(req);
-  let userId = req.user ? req.user.userId : null;
 
   try {
     // 1. SECURE AMOUNT CALCULATION
@@ -61,6 +61,14 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
       const platformFeeUSD = 0.30;
       finalAmount = basePrice + platformFeeUSD;
     }
+
+    // Fee splits based on product finalAmount
+    let platformFee = finalAmount * 0.10; // 10% platform fee
+    let affiliateEarnings = 0;
+    if (affiliateId && product.affiliateShare > 0) {
+      affiliateEarnings = finalAmount * (product.affiliateShare / 100);
+    }
+    let sellerEarnings = finalAmount - platformFee - affiliateEarnings;
 
     // If guest and no userId, check if email already exists or create temp account
     if (!userId && guestInfo) {
@@ -87,7 +95,12 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
         orderId: `free_${Date.now()}`,
         userId,
         productId,
+        sellerId: product.sellerId,
+        affiliateId,
         amount: 0,
+        platformFee: 0,
+        sellerEarnings: 0,
+        affiliateEarnings: 0,
         status: 'completed',
         ip: clientIp,
         logs: [{ event: 'Free Purchase Completed' }]
@@ -108,27 +121,19 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
       notes: { productId, userId, ip: clientIp }
     };
 
-    console.log('--- RAZORPAY DIAGNOSTICS ---');
-    console.log('Attempting to create order with options:', JSON.stringify(options));
-    
-    console.log('--- KEY DIAGNOSTICS ---');
-    console.log({
-      keyId: process.env.RAZORPAY_KEY_ID?.substring(0, 15),
-      secretLength: process.env.RAZORPAY_KEY_SECRET?.length
-    });
-    console.log('-----------------------');
-
     const order = await razorpay.orders.create(options);
-
-    console.log('Order created successfully:', order.id);
-    console.log('----------------------------');
 
     // Initial log entry (Audit Trail)
     const transaction = new Transaction({
       orderId: order.id,
       userId,
       productId,
+      sellerId: product.sellerId,
+      affiliateId,
       amount: finalAmount,
+      platformFee,
+      sellerEarnings,
+      affiliateEarnings,
       currency,
       ip: clientIp,
       logs: [{ event: 'Created Razorpay Order', metadata: { orderId: order.id, notes: options.notes } }]
@@ -195,6 +200,21 @@ router.post('/verify', optionalVerifyToken, async (req, res) => {
         if (transaction.userId && transaction.productId) {
           const user = await User.findById(transaction.userId);
           const product = await Product.findById(transaction.productId);
+
+          // Credit Seller
+          if (transaction.sellerId && transaction.sellerEarnings > 0) {
+            await User.findByIdAndUpdate(transaction.sellerId, {
+              $inc: { 'sellerProfile.balance': transaction.sellerEarnings, 'sellerProfile.totalEarned': transaction.sellerEarnings }
+            });
+          }
+
+          // Credit Affiliate
+          if (transaction.affiliateId && transaction.affiliateEarnings > 0) {
+            // (Assuming affiliate earnings goes to the same structure or a different one. User has role affiliate)
+            // Let's assume we can add a generic balance or affiliate specific one. We'll use a generic balance or skip for now since affiliate schema might differ.
+            // Wait, we can add it to sellerProfile.balance just in case, but let's add an affiliate balance field if it doesn't exist, or just skip if we don't have an affiliate schema yet.
+            // Actually, we'll just track it in the transaction for now, and handle affiliate dashboard later.
+          }
 
           if (user && product) {
             await User.findByIdAndUpdate(transaction.userId, { 

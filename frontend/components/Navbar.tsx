@@ -155,6 +155,9 @@ export default function Navbar() {
                 </Link>
                 <div className={styles.userDropdown}>
                   <Link href="/dashboard">My Dashboard</Link>
+                  {userRole === 'admin' && <Link href="/admin/dashboard">Admin Dashboard</Link>}
+                  {userRole === 'seller' && <Link href="/seller/dashboard">Seller Portal</Link>}
+                  {userRole !== 'seller' && userRole !== 'admin' && <Link href="/seller/signup">Become a Seller</Link>}
                   {userRole === 'affiliate' && <Link href="/affiliate/dashboard">Affiliate Portal</Link>}
                   <button onClick={() => { 
                     localStorage.removeItem('token'); 

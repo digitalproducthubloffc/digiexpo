@@ -44,22 +44,30 @@ router.get('/my-chat', verifyToken, async (req, res) => {
 // User sends a message (text or media)
 router.post('/my-chat/send', verifyToken, upload.single('media'), async (req, res) => {
   try {
-    let chat = await Chat.findOne({ userId: req.user.userId });
+    let productName;
+    let sellerId = null;
+
+    if (req.body.productId) {
+      const Product = require('../models/Product');
+      const product = await Product.findById(req.body.productId);
+      if (product) {
+        productName = product.title;
+        sellerId = product.sellerId;
+      }
+    }
+
+    let chatQuery = { userId: req.user.userId, sellerId: sellerId || null };
+    let chat = await Chat.findOne(chatQuery);
+    
     if (!chat) {
       const user = await User.findById(req.user.userId);
       chat = await Chat.create({
         userId: req.user.userId,
+        sellerId: sellerId || null,
         userName: user?.name || 'User',
         userEmail: user?.email || '',
         messages: []
       });
-    }
-
-    let productName;
-    if (req.body.productId) {
-      const Product = require('../models/Product');
-      const product = await Product.findById(req.body.productId);
-      if (product) productName = product.title;
     }
 
     const message = {
@@ -106,37 +114,52 @@ router.post('/my-chat/read', verifyToken, async (req, res) => {
   }
 });
 
-// ───── ADMIN ENDPOINTS ─────
+const { verifySellerOrAdmin } = require('./auth');
 
-// Get all chats (admin)
-router.get('/all', verifyAdmin, async (req, res) => {
+// ───── ADMIN / SELLER ENDPOINTS ─────
+
+// Get all chats (admin or seller)
+router.get('/all', verifySellerOrAdmin, async (req, res) => {
   try {
-    const chats = await Chat.find().sort({ lastMessageAt: -1 });
+    let query = {};
+    if (req.user.role === 'seller' && !req.user.admin) {
+      query.sellerId = req.user.userId;
+    }
+    const chats = await Chat.find(query).sort({ lastMessageAt: -1 });
     res.json(chats);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Get a single chat by ID (admin)
-router.get('/:chatId', verifyAdmin, async (req, res) => {
+// Get a single chat by ID (admin or seller)
+router.get('/:chatId', verifySellerOrAdmin, async (req, res) => {
   try {
     const chat = await Chat.findById(req.params.chatId);
     if (!chat) return res.status(404).json({ message: 'Chat not found' });
+
+    if (req.user.role === 'seller' && !req.user.admin && chat.sellerId?.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized to view this chat' });
+    }
+
     res.json(chat);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// Admin sends a message to a chat
-router.post('/:chatId/reply', verifyAdmin, upload.single('media'), async (req, res) => {
+// Admin/Seller sends a message to a chat
+router.post('/:chatId/reply', verifySellerOrAdmin, upload.single('media'), async (req, res) => {
   try {
     const chat = await Chat.findById(req.params.chatId);
     if (!chat) return res.status(404).json({ message: 'Chat not found' });
 
+    if (req.user.role === 'seller' && !req.user.admin && chat.sellerId?.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized to reply to this chat' });
+    }
+
     const message = {
-      sender: 'admin',
+      sender: req.user.admin ? 'admin' : 'seller',
       text: req.body.text || '',
       readByAdmin: true,
       readByUser: false
@@ -159,11 +182,15 @@ router.post('/:chatId/reply', verifyAdmin, upload.single('media'), async (req, r
   }
 });
 
-// Admin marks messages as read
-router.post('/:chatId/read', verifyAdmin, async (req, res) => {
+// Admin/Seller marks messages as read
+router.post('/:chatId/read', verifySellerOrAdmin, async (req, res) => {
   try {
     const chat = await Chat.findById(req.params.chatId);
     if (!chat) return res.status(404).json({ message: 'Chat not found' });
+
+    if (req.user.role === 'seller' && !req.user.admin && chat.sellerId?.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
 
     chat.messages.forEach(msg => {
       if (msg.sender === 'user') msg.readByAdmin = true;

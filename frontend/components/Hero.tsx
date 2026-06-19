@@ -21,7 +21,7 @@ export default function Hero() {
           <Link href="/affiliate" className={styles.primaryBtn}>
             BECOME AFFILIATE
           </Link>
-          <Link href="/coming-soon" className={styles.secondaryBtn}>
+          <Link href="/seller/signup" className={styles.secondaryBtn}>
             BECOME SELLER
           </Link>
         </div>
