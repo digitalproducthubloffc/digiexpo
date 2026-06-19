@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchSellerAnalytics, addPaymentMethod, purchaseVerification, updateSellerProfile, fetchProducts, createProduct, BASE_URL, fetchAllChats, adminReplyChat, adminMarkChatRead } from '@/lib/api';
-import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity } from 'lucide-react';
+import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity, Send } from 'lucide-react';
 import styles from './sellerDashboard.module.css';
 
 export default function SellerDashboard() {
@@ -91,7 +91,7 @@ export default function SellerDashboard() {
       if (files.thumbnail) fd.append('thumbnail', files.thumbnail);
       if (files.digitalFile) fd.append('digitalFile', files.digitalFile);
 
-      await createProduct(token, fd);
+      await createProduct(fd, token);
       setStatus('Product created successfully!');
       loadProducts();
     } catch (err: any) {
