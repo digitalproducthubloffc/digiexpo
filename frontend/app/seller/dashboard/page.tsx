@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchSellerAnalytics, addPaymentMethod, purchaseVerification, updateSellerProfile, fetchProducts, createProduct, BASE_URL, fetchAllChats, adminReplyChat, adminMarkChatRead } from '@/lib/api';
 import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity, Send } from 'lucide-react';
+import ProductCard from '@/components/ProductCard';
 import styles from './sellerDashboard.module.css';
 
 export default function SellerDashboard() {
@@ -21,6 +22,7 @@ export default function SellerDashboard() {
     title: '', description: '', category: '', originalPrice: '', realPrice: '', affiliateShare: '0', termsAndConditions: ''
   });
   const [files, setFiles] = useState({ thumbnail: null, digitalFile: null });
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   // Verification
   const [verificationTier, setVerificationTier] = useState('none');
@@ -98,6 +100,14 @@ export default function SellerDashboard() {
       setStatus(err.message || 'Error creating product');
     }
     setLoading(false);
+  };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFiles({ ...files, thumbnail: file as any });
+      setThumbnailPreview(URL.createObjectURL(file));
+    }
   };
 
   const handleVerifyPurchase = async (tier: string, price: number) => {
@@ -204,56 +214,77 @@ export default function SellerDashboard() {
         {activeTab === 'products' && (
           <div className={styles.tabContent}>
             <h3>Add New Product</h3>
-            <form className={styles.form} onSubmit={handleProductSubmit}>
-              <div className={styles.formGroup}>
-                <label>Title</label>
-                <input required placeholder="Product Title" value={productForm.title} onChange={e => setProductForm({...productForm, title: e.target.value})} />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Description</label>
-                <textarea required placeholder="Product Description" value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})} />
-              </div>
-              <div className={styles.formRow}>
+            
+            <div className={styles.productCreationLayout}>
+              {/* LEFT: FORM */}
+              <form className={styles.form} onSubmit={handleProductSubmit}>
                 <div className={styles.formGroup}>
-                  <label>Original Price</label>
-                  <input required type="number" placeholder="99" value={productForm.originalPrice} onChange={e => setProductForm({...productForm, originalPrice: e.target.value})} />
+                  <label>Title</label>
+                  <input required placeholder="Product Title" value={productForm.title} onChange={e => setProductForm({...productForm, title: e.target.value})} />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Selling Price</label>
-                  <input required type="number" placeholder="49" value={productForm.realPrice} onChange={e => setProductForm({...productForm, realPrice: e.target.value})} />
+                  <label>Description</label>
+                  <textarea required placeholder="Product Description" value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})} />
                 </div>
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label>Original Price</label>
+                    <input required type="number" placeholder="99" value={productForm.originalPrice} onChange={e => setProductForm({...productForm, originalPrice: e.target.value})} />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Selling Price</label>
+                    <input required type="number" placeholder="49" value={productForm.realPrice} onChange={e => setProductForm({...productForm, realPrice: e.target.value})} />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Category</label>
+                    <input required placeholder="e.g. Notion Templates" value={productForm.category} onChange={e => setProductForm({...productForm, category: e.target.value})} />
+                  </div>
+                </div>
+
                 <div className={styles.formGroup}>
-                  <label>Category</label>
-                  <input required placeholder="e.g. Notion Templates" value={productForm.category} onChange={e => setProductForm({...productForm, category: e.target.value})} />
+                  <label>Affiliate Share (%)</label>
+                  <input type="number" placeholder="20" value={productForm.affiliateShare} onChange={e => setProductForm({...productForm, affiliateShare: e.target.value})} />
+                  <small>Percentage of your earnings you are willing to give to affiliates.</small>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Terms & Conditions</label>
+                  <textarea placeholder="e.g. No refunds on digital products" value={productForm.termsAndConditions} onChange={e => setProductForm({...productForm, termsAndConditions: e.target.value})} />
+                </div>
+
+                <div className={styles.formRow}>
+                  <div className={styles.fileInputBox}>
+                    <label>Thumbnail Image</label>
+                    <input type="file" onChange={handleThumbnailChange} />
+                  </div>
+                  <div className={styles.fileInputBox}>
+                    <label>Digital File (Zip/PDF)</label>
+                    <input type="file" onChange={(e: any) => setFiles({...files, digitalFile: e.target.files[0]})} />
+                  </div>
+                </div>
+
+                <button type="submit" className={styles.submitBtn} disabled={loading}>
+                  {loading ? 'Publishing...' : 'Publish Product'}
+                </button>
+              </form>
+
+              {/* RIGHT: LIVE PREVIEW */}
+              <div className={styles.previewSection}>
+                <h4>Live Preview</h4>
+                <p className={styles.previewSubtitle}>This is how your product will appear to customers in the catalog.</p>
+                <div className={styles.previewContainer}>
+                  <ProductCard 
+                    _id="preview"
+                    title={productForm.title || "Amazing Digital Product"}
+                    category={productForm.category || "Category"}
+                    originalPrice={Number(productForm.originalPrice) || 99}
+                    realPrice={Number(productForm.realPrice) || 49}
+                    description={productForm.description || "Start typing a description to see it appear here..."}
+                    image={thumbnailPreview || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"}
+                  />
                 </div>
               </div>
-
-              <div className={styles.formGroup}>
-                <label>Affiliate Share (%)</label>
-                <input type="number" placeholder="20" value={productForm.affiliateShare} onChange={e => setProductForm({...productForm, affiliateShare: e.target.value})} />
-                <small>Percentage of your earnings you are willing to give to affiliates.</small>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Terms & Conditions</label>
-                <textarea placeholder="e.g. No refunds on digital products" value={productForm.termsAndConditions} onChange={e => setProductForm({...productForm, termsAndConditions: e.target.value})} />
-              </div>
-
-              <div className={styles.formRow}>
-                <div className={styles.fileInputBox}>
-                  <label>Thumbnail Image</label>
-                  <input type="file" onChange={(e: any) => setFiles({...files, thumbnail: e.target.files[0]})} />
-                </div>
-                <div className={styles.fileInputBox}>
-                  <label>Digital File (Zip/PDF)</label>
-                  <input type="file" onChange={(e: any) => setFiles({...files, digitalFile: e.target.files[0]})} />
-                </div>
-              </div>
-
-              <button type="submit" className={styles.submitBtn} disabled={loading}>
-                {loading ? 'Publishing...' : 'Publish Product'}
-              </button>
-            </form>
+            </div>
           </div>
         )}
 

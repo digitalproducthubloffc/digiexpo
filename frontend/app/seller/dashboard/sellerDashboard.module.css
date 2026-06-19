@@ -259,6 +259,68 @@
   flex: 1;
 }
 
+/* LIVE PREVIEW LAYOUT */
+.productCreationLayout {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.productCreationLayout form {
+  flex: 1.2;
+}
+
+.previewSection {
+  flex: 0.8;
+  position: sticky;
+  top: 40px;
+  background: #f8fafc;
+  padding: 32px;
+  border-radius: 24px;
+  border: 1px dashed #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.previewSection h4 {
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+  color: #0f172a;
+}
+
+.previewSubtitle {
+  margin: 0 0 24px 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.previewContainer {
+  width: 100%;
+  max-width: 320px;
+  /* Adds a nice glow behind the card to make it look premium */
+  position: relative;
+}
+
+.previewContainer::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.previewContainer > * {
+  position: relative;
+  z-index: 1;
+}
+
 .formGroup {
   display: flex;
   flex-direction: column;
