@@ -76,8 +76,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
             <div className={styles.priceBox}>
                <div className={styles.priceRow} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                 <span className={styles.price}>${product.realPrice?.toFixed(2)}</span>
-                 {product.originalPrice > product.realPrice && (
+                 {product.realPrice === 0 ? (
+                   <span className={styles.price} style={{ color: '#10b981' }}>Free</span>
+                 ) : (
+                   <span className={styles.price}>${product.realPrice?.toFixed(2)}</span>
+                 )}
+                 {product.originalPrice > product.realPrice && product.realPrice > 0 && (
                    <>
                      <span className={styles.originalPrice}>${product.originalPrice?.toFixed(2)}</span>
                      <span style={{ background: '#ecfdf5', color: '#10b981', padding: '4px 10px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>

@@ -115,7 +115,11 @@ export default function ProductCard({ _id, title, category, image, originalPrice
         </p>
         
         <div className={styles.footer}>
-          <span className={styles.price}>${realPrice ? realPrice.toFixed(2) : '0.00'}</span>
+          {realPrice === 0 ? (
+            <span className={styles.price} style={{ color: '#10b981', fontWeight: 800 }}>Free</span>
+          ) : (
+            <span className={styles.price}>${realPrice ? realPrice.toFixed(2) : '0.00'}</span>
+          )}
           {isMounted && (
             <button className={styles.addBtn} onClick={addToCart} suppressHydrationWarning>
               <ShoppingCart size={16} />

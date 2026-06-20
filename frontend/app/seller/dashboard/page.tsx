@@ -19,7 +19,7 @@ export default function SellerDashboard() {
   // Products State
   const [products, setProducts] = useState<any[]>([]);
   const [productForm, setProductForm] = useState({
-    title: '', description: '', category: '', originalPrice: '', realPrice: '', affiliateShare: '0', termsAndConditions: ''
+    title: '', description: '', category: '', originalPrice: '', realPrice: '', affiliateShare: '0', termsAndConditions: '', isFree: false
   });
   const [files, setFiles] = useState({ thumbnail: null, digitalFile: null });
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -89,7 +89,16 @@ export default function SellerDashboard() {
     setLoading(true);
     try {
       const fd = new FormData();
-      Object.entries(productForm).forEach(([key, val]) => fd.append(key, val as string));
+      Object.entries(productForm).forEach(([key, val]) => {
+        if (key !== 'isFree') fd.append(key, val as string);
+      });
+      
+      // If it's free, force prices to 0
+      if (productForm.isFree) {
+        fd.set('originalPrice', '0');
+        fd.set('realPrice', '0');
+      }
+
       if (files.thumbnail) fd.append('thumbnail', files.thumbnail);
       if (files.digitalFile) fd.append('digitalFile', files.digitalFile);
 
@@ -227,13 +236,28 @@ export default function SellerDashboard() {
                   <textarea required placeholder="Product Description" value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})} />
                 </div>
                 <div className={styles.formRow}>
+                  <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '12px', padding: '10px 0' }}>
+                    <input 
+                      type="checkbox" 
+                      id="isFreeCheckbox"
+                      checked={productForm.isFree} 
+                      onChange={e => {
+                        setProductForm({...productForm, isFree: e.target.checked, originalPrice: e.target.checked ? '0' : '', realPrice: e.target.checked ? '0' : ''});
+                      }} 
+                      style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                    />
+                    <label htmlFor="isFreeCheckbox" style={{ cursor: 'pointer', margin: 0, color: '#10b981' }}>Offer this product for FREE</label>
+                  </div>
+                </div>
+
+                <div className={styles.formRow}>
                   <div className={styles.formGroup}>
                     <label>Original Price</label>
-                    <input required type="number" placeholder="99" value={productForm.originalPrice} onChange={e => setProductForm({...productForm, originalPrice: e.target.value})} />
+                    <input required type="number" placeholder="99" value={productForm.isFree ? '0' : productForm.originalPrice} disabled={productForm.isFree} onChange={e => setProductForm({...productForm, originalPrice: e.target.value})} />
                   </div>
                   <div className={styles.formGroup}>
                     <label>Selling Price</label>
-                    <input required type="number" placeholder="49" value={productForm.realPrice} onChange={e => setProductForm({...productForm, realPrice: e.target.value})} />
+                    <input required type="number" placeholder="49" value={productForm.isFree ? '0' : productForm.realPrice} disabled={productForm.isFree} onChange={e => setProductForm({...productForm, realPrice: e.target.value})} />
                   </div>
                   <div className={styles.formGroup}>
                     <label>Category</label>
@@ -277,8 +301,8 @@ export default function SellerDashboard() {
                     _id="preview"
                     title={productForm.title || "Amazing Digital Product"}
                     category={productForm.category || "Category"}
-                    originalPrice={Number(productForm.originalPrice) || 99}
-                    realPrice={Number(productForm.realPrice) || 49}
+                    originalPrice={productForm.isFree ? 0 : (Number(productForm.originalPrice) || 99)}
+                    realPrice={productForm.isFree ? 0 : (Number(productForm.realPrice) || 49)}
                     description={productForm.description || "Start typing a description to see it appear here..."}
                     image={thumbnailPreview || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"}
                   />

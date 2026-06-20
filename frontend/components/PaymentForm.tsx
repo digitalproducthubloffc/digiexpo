@@ -229,11 +229,11 @@ export default function PaymentForm({ product }: { product: any }) {
 
         {!isLoggedIn ? (
           <button type="button" onClick={initiateGuestVerify} disabled={isProcessing} className={styles.payBtn}>
-            {isProcessing ? 'Creating Account & Loading Gateway...' : `Continue to Pay ₹${product.calculatedTotal}`}
+            {isProcessing ? 'Creating Account...' : (product.calculatedTotal === 0 ? 'Create Account & Get for Free' : `Continue to Pay ₹${product.calculatedTotal}`)}
           </button>
         ) : (
           <button type="submit" disabled={isProcessing} className={styles.payBtn}>
-            {isProcessing ? 'Processing...' : `Pay ₹${product.calculatedTotal}`}
+            {isProcessing ? 'Processing...' : (product.calculatedTotal === 0 ? 'Get for Free' : `Pay ₹${product.calculatedTotal}`)}
           </button>
         )}
 
