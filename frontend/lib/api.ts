@@ -265,13 +265,19 @@ export async function purchaseVerification(token: string, tier: string, paymentI
   return res.json();
 }
 
-export async function updateSellerProfile(token: string, bannerUrl: string, profileImage: string, bio: string) {
+export async function updateSellerProfile(token: string, bannerUrl: string, profileImage: string, bio: string, socialLinks?: any) {
   const res = await fetch(`${API_URL}/seller/profile`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ bannerUrl, profileImage, bio })
+    body: JSON.stringify({ bannerUrl, profileImage, bio, socialLinks })
   });
   if (!res.ok) throw new Error('Failed to update seller profile');
+  return res.json();
+}
+
+export async function fetchSellerShop(id: string) {
+  const res = await fetch(`${API_URL}/seller/shop/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch seller shop profile');
   return res.json();
 }
 

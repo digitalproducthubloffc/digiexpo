@@ -35,6 +35,12 @@ export default function SellerDashboard() {
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [chatReply, setChatReply] = useState('');
 
+  // Profile Settings
+  const [profileForm, setProfileForm] = useState({
+    bannerUrl: '', profileImage: '', bio: '',
+    socialLinks: { instagram: '', facebook: '', twitter: '', website: '' }
+  });
+
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
   const router = useRouter();
@@ -50,6 +56,14 @@ export default function SellerDashboard() {
     
     setToken(storedToken);
     setUserProfile(user);
+    if (user.sellerProfile) {
+      setProfileForm({
+        bannerUrl: user.sellerProfile.bannerUrl || '',
+        profileImage: user.sellerProfile.profileImage || '',
+        bio: user.sellerProfile.bio || '',
+        socialLinks: user.sellerProfile.socialLinks || { instagram: '', facebook: '', twitter: '', website: '' }
+      });
+    }
     loadAnalytics(storedToken, timeRange);
     loadProducts();
     loadChats(storedToken);
@@ -156,6 +170,21 @@ export default function SellerDashboard() {
     }
   };
 
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+    setLoading(true);
+    try {
+      const updatedUser = await updateSellerProfile(token, profileForm.bannerUrl, profileForm.profileImage, profileForm.bio, profileForm.socialLinks);
+      setUserProfile(updatedUser.user);
+      localStorage.setItem('user', JSON.stringify(updatedUser.user));
+      setStatus('Profile updated successfully!');
+    } catch (err: any) {
+      setStatus(err.message || 'Error updating profile');
+    }
+    setLoading(false);
+  };
+
   return (
     <div className={styles.container}>
       {/* Sidebar */}
@@ -163,6 +192,7 @@ export default function SellerDashboard() {
         <div className={styles.logo}>Seller Portal</div>
         <nav className={styles.nav}>
           <button className={activeTab === 'analytics' ? styles.active : ''} onClick={() => setActiveTab('analytics')}><BarChart3 size={20}/> Analytics</button>
+          <button className={activeTab === 'profile' ? styles.active : ''} onClick={() => setActiveTab('profile')}><Settings size={20}/> Profile & Shop</button>
           <button className={activeTab === 'products' ? styles.active : ''} onClick={() => setActiveTab('products')}><Package size={20}/> My Products</button>
           <button className={activeTab === 'chats' ? styles.active : ''} onClick={() => setActiveTab('chats')}><MessageCircle size={20}/> Customer Chats</button>
           <button className={activeTab === 'verification' ? styles.active : ''} onClick={() => setActiveTab('verification')}><BadgeCheck size={20}/> Verification</button>
@@ -217,6 +247,57 @@ export default function SellerDashboard() {
                 <p>No country data yet.</p>
               )}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'profile' && (
+          <div className={styles.tabContent}>
+            <h3>Shop Profile Settings</h3>
+            <p className={styles.verifyDesc}>Customize how your public shop looks to customers.</p>
+            
+            <form className={styles.form} onSubmit={handleProfileSubmit} style={{ maxWidth: '800px', marginTop: '20px' }}>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Banner Image URL <small>(Recommended: 1200x300 px)</small></label>
+                  <input placeholder="https://..." value={profileForm.bannerUrl} onChange={e => setProfileForm({...profileForm, bannerUrl: e.target.value})} />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Profile Picture (DP) URL <small>(Recommended: 150x150 px)</small></label>
+                  <input placeholder="https://..." value={profileForm.profileImage} onChange={e => setProfileForm({...profileForm, profileImage: e.target.value})} />
+                </div>
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label>Bio / Description</label>
+                <textarea placeholder="Tell customers about yourself and your products..." value={profileForm.bio} onChange={e => setProfileForm({...profileForm, bio: e.target.value})} rows={4} />
+              </div>
+
+              <h4 style={{ marginTop: '20px', marginBottom: '10px' }}>Social Links</h4>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Instagram URL</label>
+                  <input placeholder="https://instagram.com/..." value={profileForm.socialLinks.instagram} onChange={e => setProfileForm({...profileForm, socialLinks: {...profileForm.socialLinks, instagram: e.target.value}})} />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Facebook URL</label>
+                  <input placeholder="https://facebook.com/..." value={profileForm.socialLinks.facebook} onChange={e => setProfileForm({...profileForm, socialLinks: {...profileForm.socialLinks, facebook: e.target.value}})} />
+                </div>
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Twitter/X URL</label>
+                  <input placeholder="https://twitter.com/..." value={profileForm.socialLinks.twitter} onChange={e => setProfileForm({...profileForm, socialLinks: {...profileForm.socialLinks, twitter: e.target.value}})} />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Website URL</label>
+                  <input placeholder="https://yourwebsite.com" value={profileForm.socialLinks.website} onChange={e => setProfileForm({...profileForm, socialLinks: {...profileForm.socialLinks, website: e.target.value}})} />
+                </div>
+              </div>
+
+              <button type="submit" className={styles.submitBtn} disabled={loading} style={{ marginTop: '20px' }}>
+                {loading ? 'Saving...' : 'Save Profile Settings'}
+              </button>
+            </form>
           </div>
         )}
 

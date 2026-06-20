@@ -93,7 +93,7 @@ router.post('/verify', verifyToken, verifySeller, async (req, res) => {
 
 // 4. Update Profile Banner / DP
 router.post('/profile', verifyToken, verifySeller, async (req, res) => {
-  const { bannerUrl, profileImage, bio } = req.body;
+  const { bannerUrl, profileImage, bio, socialLinks } = req.body;
   try {
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -101,9 +101,42 @@ router.post('/profile', verifyToken, verifySeller, async (req, res) => {
     if (bannerUrl) user.sellerProfile.bannerUrl = bannerUrl;
     if (profileImage) user.sellerProfile.profileImage = profileImage;
     if (bio) user.sellerProfile.bio = bio;
+    if (socialLinks) {
+      if (socialLinks.instagram !== undefined) user.sellerProfile.socialLinks.instagram = socialLinks.instagram;
+      if (socialLinks.facebook !== undefined) user.sellerProfile.socialLinks.facebook = socialLinks.facebook;
+      if (socialLinks.twitter !== undefined) user.sellerProfile.socialLinks.twitter = socialLinks.twitter;
+      if (socialLinks.website !== undefined) user.sellerProfile.socialLinks.website = socialLinks.website;
+    }
 
     await user.save();
     res.json({ message: 'Profile updated', user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 5. Public Shop Profile
+router.get('/shop/:id', async (req, res) => {
+  try {
+    const sellerId = req.params.id;
+    const seller = await User.findById(sellerId).select('name role sellerProfile createdAt');
+    
+    if (!seller || (seller.role !== 'seller' && seller.role !== 'admin')) {
+      return res.status(404).json({ message: 'Seller not found' });
+    }
+
+    const products = await Product.find({ sellerId: seller._id, inStock: true }).sort({ createdAt: -1 });
+    const sellerObj = seller.sellerProfile ? seller.sellerProfile.toObject() : {};
+
+    res.json({
+      seller: {
+        _id: seller._id,
+        name: seller.name,
+        joinedDate: seller.createdAt,
+        ...sellerObj
+      },
+      products
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -23,6 +23,12 @@ const userSchema = new mongoose.Schema({
     bannerUrl: { type: String },
     profileImage: { type: String },
     bio: { type: String },
+    socialLinks: {
+      instagram: { type: String, default: '' },
+      facebook: { type: String, default: '' },
+      twitter: { type: String, default: '' },
+      website: { type: String, default: '' }
+    },
     verificationTier: { type: String, enum: ['none', 'tier1', 'tier2', 'tier3'], default: 'none' }, // tier1=$5, tier2=$7, tier3=$10
     paymentMethods: [{
       type: { type: String, enum: ['bank', 'paypal'] },
