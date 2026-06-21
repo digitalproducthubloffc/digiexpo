@@ -8,8 +8,12 @@ const { uploadFile } = require('../utils/cloudinary');
 // Get all products (with optional filtering)
 router.get('/', async (req, res) => {
   try {
-    const { category, search, minPrice, maxPrice, sortBy, type, freeOnly } = req.query;
+    const { category, search, minPrice, maxPrice, sortBy, type, freeOnly, sellerId } = req.query;
     let query = {};
+
+    if (sellerId) {
+      query.sellerId = sellerId;
+    }
 
     if (category) {
       query.category = category;

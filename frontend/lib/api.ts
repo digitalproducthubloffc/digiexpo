@@ -9,6 +9,7 @@ export async function fetchProducts(params?: {
   sortBy?: string;
   type?: string;
   freeOnly?: string | boolean;
+  sellerId?: string;
 }) {
   try {
     let url = `${API_URL}/products`;
@@ -292,7 +293,17 @@ export async function updateSellerProfile(token: string, formData: FormData) {
     headers: { Authorization: `Bearer ${token}` },
     body: formData
   });
-  if (!res.ok) throw new Error('Failed to update seller profile');
+  if (!res.ok) {
+    let errorMsg = 'Failed to update seller profile';
+    try {
+      const errorData = await res.json();
+      errorMsg = errorData.message || errorMsg;
+    } catch {
+      const text = await res.text();
+      errorMsg = text || errorMsg;
+    }
+    throw new Error(errorMsg);
+  }
   return res.json();
 }
 

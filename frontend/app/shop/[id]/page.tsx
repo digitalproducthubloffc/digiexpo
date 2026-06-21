@@ -95,7 +95,7 @@ export default function SellerShopPage() {
   const { socialLinks } = seller;
 
   return (
-    <main style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+    <main style={{ backgroundColor: '#f8fafc', minHeight: '100vh', paddingTop: '70px' }}>
       <Navbar />
 
       {/* Hero Banner Section */}

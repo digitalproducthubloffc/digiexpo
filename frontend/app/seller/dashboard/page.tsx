@@ -74,7 +74,7 @@ export default function SellerDashboard() {
       });
     }
     loadAnalytics(storedToken, timeRange);
-    loadProducts();
+    loadProducts(user._id);
     loadChats(storedToken);
   }, [router, timeRange]);
 
@@ -87,10 +87,9 @@ export default function SellerDashboard() {
     }
   };
 
-  const loadProducts = async () => {
+  const loadProducts = async (sellerId: string) => {
     try {
-      const data = await fetchProducts();
-      // In a real app we'd fetch only seller products, but for now filter on frontend if needed or API handles it
+      const data = await fetchProducts({ sellerId });
       setProducts(data);
     } catch (e) {
       console.error(e);
