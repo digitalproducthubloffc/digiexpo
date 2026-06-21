@@ -72,7 +72,7 @@ export default function PaymentForm({ product }: { product: any }) {
         body: JSON.stringify({
           productId: product._id,
           amount: product.calculatedTotal,
-          currency: 'INR'
+          currency: product.selectedCurrency
         })
       });
 
@@ -98,7 +98,7 @@ export default function PaymentForm({ product }: { product: any }) {
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: Math.round(product.calculatedTotal * 100),
-        currency: "INR",
+        currency: product.selectedCurrency,
         name: "DigiExpo",
         description: `Purchase: ${product.title}`,
         order_id: orderData.id,
@@ -148,37 +148,15 @@ export default function PaymentForm({ product }: { product: any }) {
     if (token) executePayment(token);
   };
 
-  // If USD is selected, we only show the Gumroad button
-  if (product.selectedCurrency === 'USD') {
-    return (
-      <div className={styles.paymentForm}>
-        <h2 className={styles.formTitle}>International Checkout</h2>
-        <div style={{ textAlign: 'center', margin: '40px 0' }}>
-          <p style={{ color: '#64748b', marginBottom: '20px' }}>
-            For USD payments, we securely process transactions via our external partner.
-          </p>
-          <a 
-            href={product.externalPurchaseLink || '#'} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={styles.payBtn}
-            style={{ display: 'inline-block', textDecoration: 'none' }}
-          >
-            Buy Securely via Gumroad
-          </a>
-        </div>
-        <p className={styles.guarantee}>
-          <ShieldCheck size={16} />
-          Encrypted checkout by External Partner.
-        </p>
-      </div>
-    );
-  }
+  const currencySymbol = product.selectedCurrency === 'USD' ? '$' : '₹';
+  const formatAmount = (amt: number) => {
+    return product.selectedCurrency === 'USD' ? amt.toFixed(2) : amt;
+  };
 
   return (
     <div className={styles.paymentForm}>
       <h2 className={styles.formTitle}>
-        {isLoggedIn ? 'Payment Method (INR)' : 'Secure Billing Details'}
+        {isLoggedIn ? `Payment Method (${product.selectedCurrency})` : 'Secure Billing Details'}
       </h2>
 
       {!isLoggedIn && (
@@ -229,11 +207,11 @@ export default function PaymentForm({ product }: { product: any }) {
 
         {!isLoggedIn ? (
           <button type="button" onClick={initiateGuestVerify} disabled={isProcessing} className={styles.payBtn}>
-            {isProcessing ? 'Creating Account...' : (product.calculatedTotal === 0 ? 'Create Account & Get for Free' : `Continue to Pay ₹${product.calculatedTotal}`)}
+            {isProcessing ? 'Creating Account...' : (product.calculatedTotal === 0 ? 'Create Account & Get for Free' : `Continue to Pay ${currencySymbol}${formatAmount(product.calculatedTotal)}`)}
           </button>
         ) : (
           <button type="submit" disabled={isProcessing} className={styles.payBtn}>
-            {isProcessing ? 'Processing...' : (product.calculatedTotal === 0 ? 'Get for Free' : `Pay ₹${product.calculatedTotal}`)}
+            {isProcessing ? 'Processing...' : (product.calculatedTotal === 0 ? 'Get for Free' : `Pay ${currencySymbol}${formatAmount(product.calculatedTotal)}`)}
           </button>
         )}
 
