@@ -50,6 +50,7 @@ export default function SellerDashboard() {
 
   const [followModalOpen, setFollowModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
@@ -517,18 +518,16 @@ export default function SellerDashboard() {
           <div className={styles.tabContent}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h3 style={{ margin: 0 }}>Add New Product</h3>
-              <a 
-                href={`/shop/${userProfile?._id}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: '#e2e8f0', color: '#0f172a', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s' }}
+              <button 
+                onClick={() => setPreviewModalOpen(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: '#e2e8f0', color: '#0f172a', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s' }}
               >
                 <Eye size={16} /> Live Preview
-              </a>
+              </button>
             </div>
             
-            <div className={styles.productCreationLayout}>
-              {/* LEFT: FORM */}
+            <div className={styles.productCreationLayout} style={{ display: 'block', maxWidth: '700px' }}>
+              {/* FORM */}
               <form className={styles.form} onSubmit={handleProductSubmit}>
                 {addProductStep === 1 ? (
                   <>
@@ -627,24 +626,29 @@ export default function SellerDashboard() {
                   </>
                 )}
               </form>
-
-              {/* RIGHT: LIVE PREVIEW */}
-              <div className={styles.previewSection}>
-                <h4>Live Preview</h4>
-                <p className={styles.previewSubtitle}>This is how your product will appear to customers in the catalog.</p>
-                <div className={styles.previewContainer} style={{ pointerEvents: 'none' }}>
-                  <ProductCard 
-                    _id="preview"
-                    title={productForm.title || "Amazing Digital Product"}
-                    category={productForm.category || "Category"}
-                    originalPrice={productForm.isFree ? 0 : (Number(productForm.originalPrice) || 99)}
-                    realPrice={productForm.isFree ? 0 : (Number(productForm.realPrice) || 49)}
-                    description={productForm.description || "Start typing a description to see it appear here..."}
-                    image={thumbnailPreview || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"}
-                  />
+            </div>
+            
+            {/* LIVE PREVIEW MODAL */}
+            {previewModalOpen && (
+              <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }} onClick={() => setPreviewModalOpen(false)}>
+                <div style={{ background: 'white', borderRadius: '24px', padding: '40px', maxWidth: '400px', width: '100%', position: 'relative' }} onClick={e => e.stopPropagation()}>
+                  <button onClick={() => setPreviewModalOpen(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>✕</button>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', color: '#0f172a', textAlign: 'center' }}>Live Preview</h4>
+                  <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '24px', textAlign: 'center' }}>This is how your product will appear in the catalog.</p>
+                  <div style={{ pointerEvents: 'none' }}>
+                    <ProductCard 
+                      _id="preview"
+                      title={productForm.title || "Amazing Digital Product"}
+                      category={productForm.category || "Category"}
+                      originalPrice={productForm.isFree ? 0 : (Number(productForm.originalPrice) || 99)}
+                      realPrice={productForm.isFree ? 0 : (Number(productForm.realPrice) || 49)}
+                      description={productForm.description || "Start typing a description to see it appear here..."}
+                      image={thumbnailPreview || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
