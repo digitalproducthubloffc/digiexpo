@@ -311,7 +311,14 @@ export default function SellerDashboard() {
                     </span>
                     {userProfile?.country && <span className={styles.pStat} title="Country">🌍 {userProfile.country}</span>}
                     <span className={styles.pStat} title="Total Sales">🛍 {analytics?.totalSales || 0} sales</span>
-                    <span className={styles.pStat} title="Total Products">📦 {products.length} products</span>
+                    <span 
+                      className={styles.pStat} 
+                      title="Total Products" 
+                      onClick={() => setActiveTab('products')}
+                      style={{ cursor: 'pointer', color: products.length === 0 ? '#7c3aed' : undefined, fontWeight: products.length === 0 ? 600 : undefined }}
+                    >
+                      📦 {products.length === 0 ? 'Add product' : `${products.length} products`}
+                    </span>
                     <span className={styles.pStat} title="Time on platform">
                       📅 {userProfile?.createdAt
                         ? `${Math.floor((Date.now() - new Date(userProfile.createdAt).getTime()) / (1000 * 60 * 60 * 24))} days on platform`
