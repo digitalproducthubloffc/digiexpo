@@ -118,15 +118,15 @@ router.post('/profile', verifyToken, verifySeller, upload.fields([
 
     if (req.files && req.files.bannerFile && req.files.bannerFile[0]) {
       const bFile = req.files.bannerFile[0];
-      const bannerUrl = await uploadFile(bFile.path, 'seller_profiles');
-      user.sellerProfile.bannerUrl = bannerUrl;
+      const uploadedBanner = await uploadFile(bFile.path, { folder: 'seller_profiles' });
+      user.sellerProfile.bannerUrl = uploadedBanner.secure_url;
       await fs.unlink(bFile.path).catch(console.error);
     }
 
     if (req.files && req.files.profileImageFile && req.files.profileImageFile[0]) {
       const pFile = req.files.profileImageFile[0];
-      const profileImageUrl = await uploadFile(pFile.path, 'seller_profiles');
-      user.sellerProfile.profileImage = profileImageUrl;
+      const uploadedProfile = await uploadFile(pFile.path, { folder: 'seller_profiles' });
+      user.sellerProfile.profileImage = uploadedProfile.secure_url;
       await fs.unlink(pFile.path).catch(console.error);
     }
 
