@@ -97,10 +97,57 @@
 
 .bio {
   margin-top: 10px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #475569;
   line-height: 1.6;
   max-width: 600px;
+}
+
+.followStats {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.followStats span {
+  font-size: 0.95rem;
+  color: #475569;
+  transition: color 0.2s;
+}
+
+.followStats span:hover {
+  color: #0f172a;
+}
+
+.followStats strong {
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.followBtn {
+  background: #0f172a;
+  color: white;
+  border: 1px solid #0f172a;
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.followBtn:hover {
+  background: #1e293b;
+}
+
+.followBtn.following {
+  background: white;
+  color: #0f172a;
+}
+
+.followBtn.following:hover {
+  background: #f1f5f9;
 }
 
 .productsContainer {

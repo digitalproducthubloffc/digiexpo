@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { fetchSellerShop } from '@/lib/api';
+import { fetchSellerShop, toggleFollowUser } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
+import FollowModal from '@/components/FollowModal';
 import { Globe, BadgeCheck } from 'lucide-react';
 
 const InstagramIcon = ({ size = 20 }: { size?: number }) => (
@@ -35,12 +36,32 @@ export default function SellerShopPage() {
   const [shopData, setShopData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followModalOpen, setFollowModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
+  const [loggedInUser, setLoggedInUser] = useState<any>(null);
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const t = localStorage.getItem('token');
+    const u = localStorage.getItem('user');
+    if (t) setToken(t);
+    if (u) {
+      try {
+        setLoggedInUser(JSON.parse(u));
+      } catch (e) {}
+    }
+  }, []);
 
   useEffect(() => {
     async function loadShop() {
       try {
         const data = await fetchSellerShop(params.id as string);
         setShopData(data);
+        if (loggedInUser && loggedInUser.following && loggedInUser.following.includes(data.seller._id)) {
+          setIsFollowing(true);
+        }
       } catch (err: any) {
         setError(err.message || 'Failed to load shop');
       } finally {
@@ -116,6 +137,46 @@ export default function SellerShopPage() {
             </h1>
             <p className={styles.joinedText}>Joined {new Date(seller.joinedDate).toLocaleDateString()}</p>
             {seller.bio && <p className={styles.bio}>{seller.bio}</p>}
+            
+            <div className={styles.followStats}>
+              <span onClick={() => { setModalType('followers'); setFollowModalOpen(true); }} style={{cursor: 'pointer'}}>
+                <strong>{seller.followersCount || 0}</strong> Followers
+              </span>
+              <span onClick={() => { setModalType('following'); setFollowModalOpen(true); }} style={{cursor: 'pointer'}}>
+                <strong>{seller.followingCount || 0}</strong> Following
+              </span>
+            </div>
+            
+            {loggedInUser && loggedInUser._id !== seller._id && (
+              <button 
+                className={`${styles.followBtn} ${isFollowing ? styles.following : ''}`}
+                onClick={async () => {
+                  if (!token) return;
+                  try {
+                    const res = await toggleFollowUser(seller._id, token);
+                    setIsFollowing(res.isFollowing);
+                    setShopData((prev: any) => ({
+                      ...prev,
+                      seller: {
+                        ...prev.seller,
+                        followersCount: prev.seller.followersCount + (res.isFollowing ? 1 : -1)
+                      }
+                    }));
+                    // Optionally update local storage user
+                    let updatedUser = { ...loggedInUser };
+                    if (!updatedUser.following) updatedUser.following = [];
+                    if (res.isFollowing) updatedUser.following.push(seller._id);
+                    else updatedUser.following = updatedUser.following.filter((id: string) => id !== seller._id);
+                    setLoggedInUser(updatedUser);
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -133,6 +194,15 @@ export default function SellerShopPage() {
           </div>
         )}
       </div>
+
+      <FollowModal 
+        isOpen={followModalOpen}
+        onClose={() => setFollowModalOpen(false)}
+        type={modalType}
+        userId={seller._id}
+        loggedInUserId={loggedInUser?._id}
+        token={token || undefined}
+      />
 
       <Footer />
     </main>

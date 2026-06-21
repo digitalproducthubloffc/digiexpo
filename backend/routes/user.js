@@ -61,4 +61,62 @@ router.post('/become-seller', verifyToken, async (req, res) => {
   }
 });
 
+// Toggle Follow / Unfollow
+router.post('/toggle-follow/:id', verifyToken, async (req, res) => {
+  try {
+    const targetUserId = req.params.id;
+    const currentUserId = req.user.userId;
+
+    if (targetUserId === currentUserId) {
+      return res.status(400).json({ message: "You cannot follow yourself" });
+    }
+
+    const targetUser = await User.findById(targetUserId);
+    const currentUser = await User.findById(currentUserId);
+
+    if (!targetUser) return res.status(404).json({ message: 'User to follow not found' });
+
+    const isFollowing = currentUser.following.includes(targetUserId);
+
+    if (isFollowing) {
+      // Unfollow
+      currentUser.following.pull(targetUserId);
+      targetUser.followers.pull(currentUserId);
+    } else {
+      // Follow
+      currentUser.following.push(targetUserId);
+      targetUser.followers.push(currentUserId);
+    }
+
+    await currentUser.save();
+    await targetUser.save();
+
+    res.json({ message: isFollowing ? 'Unfollowed successfully' : 'Followed successfully', isFollowing: !isFollowing });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get Followers
+router.get('/followers/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate('followers', 'name sellerProfile.profileImage');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user.followers);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get Following
+router.get('/following/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate('following', 'name sellerProfile.profileImage');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user.following);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

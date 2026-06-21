@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phone: { type: String },
   country: { type: String },
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   purchasedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
   isVerified: { type: Boolean, default: false },
   otp: { type: String },

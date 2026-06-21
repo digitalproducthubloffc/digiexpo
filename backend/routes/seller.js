@@ -150,7 +150,7 @@ router.post('/profile', verifyToken, verifySeller, upload.fields([
 router.get('/shop/:id', async (req, res) => {
   try {
     const sellerId = req.params.id;
-    const seller = await User.findById(sellerId).select('name role sellerProfile createdAt');
+    const seller = await User.findById(sellerId).select('name role sellerProfile createdAt followers following');
     
     if (!seller || (seller.role !== 'seller' && seller.role !== 'admin')) {
       return res.status(404).json({ message: 'Seller not found' });
@@ -164,6 +164,8 @@ router.get('/shop/:id', async (req, res) => {
         _id: seller._id,
         name: seller.name,
         joinedDate: seller.createdAt,
+        followersCount: seller.followers ? seller.followers.length : 0,
+        followingCount: seller.following ? seller.following.length : 0,
         ...sellerObj
       },
       products

@@ -400,3 +400,26 @@ export async function adminCloseChat(chatId: string, token: string) {
   if (!res.ok) throw new Error('Failed to close chat');
   return res.json();
 }
+
+// ───── Follower API ─────
+
+export async function toggleFollowUser(targetId: string, token: string) {
+  const res = await fetch(`${API_URL}/user/toggle-follow/${targetId}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to toggle follow');
+  return res.json();
+}
+
+export async function fetchFollowers(userId: string) {
+  const res = await fetch(`${API_URL}/user/followers/${userId}`);
+  if (!res.ok) throw new Error('Failed to fetch followers');
+  return res.json();
+}
+
+export async function fetchFollowing(userId: string) {
+  const res = await fetch(`${API_URL}/user/following/${userId}`);
+  if (!res.ok) throw new Error('Failed to fetch following');
+  return res.json();
+}
