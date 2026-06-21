@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchSellerAnalytics, addPaymentMethod, purchaseVerification, updateSellerProfile, fetchProducts, createProduct, BASE_URL, fetchAllChats, adminReplyChat, adminMarkChatRead } from '@/lib/api';
-import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity, Send, User } from 'lucide-react';
+import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity, Send, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import Navbar from '@/components/Navbar';
 import styles from './sellerDashboard.module.css';
@@ -12,6 +12,7 @@ export default function SellerDashboard() {
   const [token, setToken] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'analytics' | 'profile' | 'products' | 'payments' | 'verification' | 'chats' | 'affiliates' | 'settings'>('profile');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   
   // Analytics State
   const [analytics, setAnalytics] = useState<any>(null);
@@ -189,19 +190,26 @@ export default function SellerDashboard() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navbar />
-      <div className={styles.container} style={{ flex: 1, minHeight: 0 }}>
+      <div className={styles.container} style={{ flex: 1, minHeight: 0, paddingTop: '80px' }}>
         {/* Sidebar */}
-      <aside className={styles.sidebar}>
-        <div className={styles.logo}>Seller Portal</div>
+      <aside className={`${styles.sidebar} ${!sidebarOpen ? styles.sidebarCollapsed : ''}`}>
+        {sidebarOpen && <div className={styles.logo}>Seller Portal</div>}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className={styles.sidebarToggle}
+          title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+        >
+          {sidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+        </button>
         <nav className={styles.nav} style={{ flex: 1 }}>
-          <button className={activeTab === 'profile' ? styles.active : ''} onClick={() => setActiveTab('profile')}><User size={20}/> Profile</button>
-          <button className={activeTab === 'analytics' ? styles.active : ''} onClick={() => setActiveTab('analytics')}><BarChart3 size={20}/> Analytics</button>
-          <button className={activeTab === 'products' ? styles.active : ''} onClick={() => setActiveTab('products')}><Package size={20}/> My Products</button>
-          <button className={activeTab === 'chats' ? styles.active : ''} onClick={() => setActiveTab('chats')}><MessageCircle size={20}/> Customer Chats</button>
-          <button className={activeTab === 'verification' ? styles.active : ''} onClick={() => setActiveTab('verification')}><BadgeCheck size={20}/> Verification</button>
-          <button className={activeTab === 'payments' ? styles.active : ''} onClick={() => setActiveTab('payments')}><DollarSign size={20}/> Payments</button>
+          <button className={activeTab === 'profile' ? styles.active : ''} onClick={() => setActiveTab('profile')} title="Profile"><User size={20}/>{sidebarOpen && ' Profile'}</button>
+          <button className={activeTab === 'analytics' ? styles.active : ''} onClick={() => setActiveTab('analytics')} title="Analytics"><BarChart3 size={20}/>{sidebarOpen && ' Analytics'}</button>
+          <button className={activeTab === 'products' ? styles.active : ''} onClick={() => setActiveTab('products')} title="My Products"><Package size={20}/>{sidebarOpen && ' My Products'}</button>
+          <button className={activeTab === 'chats' ? styles.active : ''} onClick={() => setActiveTab('chats')} title="Customer Chats"><MessageCircle size={20}/>{sidebarOpen && ' Customer Chats'}</button>
+          <button className={activeTab === 'verification' ? styles.active : ''} onClick={() => setActiveTab('verification')} title="Verification"><BadgeCheck size={20}/>{sidebarOpen && ' Verification'}</button>
+          <button className={activeTab === 'payments' ? styles.active : ''} onClick={() => setActiveTab('payments')} title="Payments"><DollarSign size={20}/>{sidebarOpen && ' Payments'}</button>
           <div style={{ flex: 1 }}></div>
-          <button className={activeTab === 'settings' ? styles.active : ''} onClick={() => setActiveTab('settings')}><Settings size={20}/> Settings</button>
+          <button className={activeTab === 'settings' ? styles.active : ''} onClick={() => setActiveTab('settings')} title="Settings"><Settings size={20}/>{sidebarOpen && ' Settings'}</button>
         </nav>
       </aside>
 
