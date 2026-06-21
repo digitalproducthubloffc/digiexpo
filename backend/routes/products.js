@@ -5,10 +5,50 @@ const User = require('../models/User');
 const fs = require('fs/promises');
 const { uploadFile } = require('../utils/cloudinary');
 
-// Get all products
+// Get all products (with optional filtering)
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find();
+    const { category, search, minPrice, maxPrice, sortBy, type, freeOnly } = req.query;
+    let query = {};
+
+    if (category) {
+      query.category = category;
+    }
+
+    if (type) {
+      query.type = type;
+    }
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } }
+      ];
+    }
+
+    if (minPrice || maxPrice) {
+      query.realPrice = {};
+      if (minPrice) query.realPrice.$gte = Number(minPrice);
+      if (maxPrice) query.realPrice.$lte = Number(maxPrice);
+    }
+
+    if (freeOnly === 'true') {
+      query.realPrice = 0;
+    }
+
+    let sortOptions = { createdAt: -1 }; // default: newest first
+    if (sortBy === 'priceAsc') {
+      sortOptions = { realPrice: 1 };
+    } else if (sortBy === 'priceDesc') {
+      sortOptions = { realPrice: -1 };
+    } else if (sortBy === 'rating') {
+      sortOptions = { rating: -1 };
+    } else if (sortBy === 'newest') {
+      sortOptions = { createdAt: -1 };
+    }
+
+    const products = await Product.find(query).sort(sortOptions);
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });

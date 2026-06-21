@@ -1,9 +1,30 @@
 export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:7001';
 export const API_URL = `${BASE_URL}/api`;
 
-export async function fetchProducts() {
+export async function fetchProducts(params?: {
+  category?: string;
+  search?: string;
+  minPrice?: string | number;
+  maxPrice?: string | number;
+  sortBy?: string;
+  type?: string;
+  freeOnly?: string | boolean;
+}) {
   try {
-    const res = await fetch(`${API_URL}/products`, { cache: 'no-store' });
+    let url = `${API_URL}/products`;
+    if (params) {
+      const qParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined && val !== null && val !== '') {
+          qParams.append(key, String(val));
+        }
+      });
+      const queryString = qParams.toString();
+      if (queryString) {
+        url += `?${queryString}`;
+      }
+    }
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return [];
     return res.json();
   } catch {
