@@ -106,7 +106,7 @@ router.post('/profile', verifyToken, verifySeller, upload.fields([
   { name: 'bannerFile', maxCount: 1 },
   { name: 'profileImageFile', maxCount: 1 }
 ]), async (req, res) => {
-  const { bio, portfolioUrl, socialLinks } = req.body;
+  const { bio, portfolioUrl, socialLinks, country } = req.body;
   let parsedSocialLinks;
   try {
     parsedSocialLinks = socialLinks ? JSON.parse(socialLinks) : undefined;
@@ -132,6 +132,7 @@ router.post('/profile', verifyToken, verifySeller, upload.fields([
 
     if (bio !== undefined) user.sellerProfile.bio = bio;
     if (portfolioUrl !== undefined) user.sellerProfile.portfolioUrl = portfolioUrl;
+    if (country !== undefined) user.country = country;
     if (parsedSocialLinks) {
       if (parsedSocialLinks.instagram !== undefined) user.sellerProfile.socialLinks.instagram = parsedSocialLinks.instagram;
       if (parsedSocialLinks.facebook !== undefined) user.sellerProfile.socialLinks.facebook = parsedSocialLinks.facebook;

@@ -40,7 +40,7 @@ export default function SellerDashboard() {
 
   // Profile Settings
   const [profileForm, setProfileForm] = useState({
-    bannerUrl: '', profileImage: '', bio: '', portfolioUrl: '',
+    bannerUrl: '', profileImage: '', bio: '', portfolioUrl: '', country: '',
     socialLinks: { instagram: '', facebook: '', twitter: '', website: '' }
   });
   const [bannerFile, setBannerFile] = useState<File | null>(null);
@@ -70,6 +70,7 @@ export default function SellerDashboard() {
         profileImage: user.sellerProfile.profileImage || '',
         bio: user.sellerProfile.bio || '',
         portfolioUrl: user.sellerProfile.portfolioUrl || '',
+        country: user.country || '',
         socialLinks: user.sellerProfile.socialLinks || { instagram: '', facebook: '', twitter: '', website: '' }
       });
     }
@@ -185,6 +186,7 @@ export default function SellerDashboard() {
     try {
       const formData = new FormData();
       formData.append('bio', profileForm.bio);
+      formData.append('country', profileForm.country);
       formData.append('socialLinks', JSON.stringify(profileForm.socialLinks));
       if (bannerFile) formData.append('bannerFile', bannerFile);
       if (profileImageFile) formData.append('profileImageFile', profileImageFile);
@@ -368,9 +370,15 @@ export default function SellerDashboard() {
                   {profileForm.profileImage && !profileImageFile && <small>Current avatar is set.</small>}
                 </div>
               </div>
-              <div className={styles.formGroup}>
-                <label>Bio / Description</label>
-                <textarea placeholder="Tell buyers about your shop..." value={profileForm.bio} onChange={e => setProfileForm({...profileForm, bio: e.target.value})} />
+              <div className={styles.formRow}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
+                  <label>Bio / Description</label>
+                  <textarea placeholder="Tell buyers about your shop..." value={profileForm.bio} onChange={e => setProfileForm({...profileForm, bio: e.target.value})} />
+                </div>
+                <div className={styles.formGroup} style={{ width: '250px' }}>
+                  <label>Country</label>
+                  <input placeholder="e.g. United States" value={profileForm.country} onChange={e => setProfileForm({...profileForm, country: e.target.value})} />
+                </div>
               </div>
 
               <h4 style={{ marginTop: '20px', marginBottom: '10px' }}>Social Links</h4>

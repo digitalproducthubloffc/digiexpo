@@ -135,7 +135,10 @@ export default function SellerShopPage() {
               {seller.name}
               {seller.verificationTier !== 'none' && <BadgeCheck className={styles.verifiedBadge} size={24} />}
             </h1>
-            <p className={styles.joinedText}>Joined {new Date(seller.joinedDate).toLocaleDateString()}</p>
+            <p className={styles.joinedText}>
+              Joined {new Date(seller.joinedDate).toLocaleDateString()} 
+              {seller.country && ` • 🌍 ${seller.country}`}
+            </p>
             {seller.bio && <p className={styles.bio}>{seller.bio}</p>}
             
             <div className={styles.followStats}>
