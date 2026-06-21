@@ -355,6 +355,18 @@ export default function SellerDashboard() {
                 )}
               </div>
             </div>
+
+            {/* Display products below profile if there are any */}
+            {products.length > 0 && (
+              <div style={{ padding: '0 36px 36px 36px', background: 'white' }}>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1e293b', marginBottom: '20px', borderBottom: '2px solid #e2e8f0', paddingBottom: '10px' }}>Your Products</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '28px' }}>
+                  {products.map((product: any) => (
+                    <ProductCard key={product._id} {...product} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
