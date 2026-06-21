@@ -4,6 +4,16 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const Product = require('../models/Product');
 const { verifyToken } = require('./auth');
+const fs = require('fs/promises');
+const { uploadFile } = require('../utils/cloudinary');
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+const upload = multer({ storage });
 
 // Middleware to ensure user is a seller
 const verifySeller = async (req, res, next) => {
@@ -92,20 +102,41 @@ router.post('/verify', verifyToken, verifySeller, async (req, res) => {
 });
 
 // 4. Update Profile Banner / DP
-router.post('/profile', verifyToken, verifySeller, async (req, res) => {
-  const { bannerUrl, profileImage, bio, socialLinks } = req.body;
+router.post('/profile', verifyToken, verifySeller, upload.fields([
+  { name: 'bannerFile', maxCount: 1 },
+  { name: 'profileImageFile', maxCount: 1 }
+]), async (req, res) => {
+  const { bio, portfolioUrl, socialLinks } = req.body;
+  let parsedSocialLinks;
+  try {
+    parsedSocialLinks = socialLinks ? JSON.parse(socialLinks) : undefined;
+  } catch(e) {}
+
   try {
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (bannerUrl) user.sellerProfile.bannerUrl = bannerUrl;
-    if (profileImage) user.sellerProfile.profileImage = profileImage;
-    if (bio) user.sellerProfile.bio = bio;
-    if (socialLinks) {
-      if (socialLinks.instagram !== undefined) user.sellerProfile.socialLinks.instagram = socialLinks.instagram;
-      if (socialLinks.facebook !== undefined) user.sellerProfile.socialLinks.facebook = socialLinks.facebook;
-      if (socialLinks.twitter !== undefined) user.sellerProfile.socialLinks.twitter = socialLinks.twitter;
-      if (socialLinks.website !== undefined) user.sellerProfile.socialLinks.website = socialLinks.website;
+    if (req.files && req.files.bannerFile && req.files.bannerFile[0]) {
+      const bFile = req.files.bannerFile[0];
+      const bannerUrl = await uploadFile(bFile.path, 'seller_profiles');
+      user.sellerProfile.bannerUrl = bannerUrl;
+      await fs.unlink(bFile.path).catch(console.error);
+    }
+
+    if (req.files && req.files.profileImageFile && req.files.profileImageFile[0]) {
+      const pFile = req.files.profileImageFile[0];
+      const profileImageUrl = await uploadFile(pFile.path, 'seller_profiles');
+      user.sellerProfile.profileImage = profileImageUrl;
+      await fs.unlink(pFile.path).catch(console.error);
+    }
+
+    if (bio !== undefined) user.sellerProfile.bio = bio;
+    if (portfolioUrl !== undefined) user.sellerProfile.portfolioUrl = portfolioUrl;
+    if (parsedSocialLinks) {
+      if (parsedSocialLinks.instagram !== undefined) user.sellerProfile.socialLinks.instagram = parsedSocialLinks.instagram;
+      if (parsedSocialLinks.facebook !== undefined) user.sellerProfile.socialLinks.facebook = parsedSocialLinks.facebook;
+      if (parsedSocialLinks.twitter !== undefined) user.sellerProfile.socialLinks.twitter = parsedSocialLinks.twitter;
+      if (parsedSocialLinks.website !== undefined) user.sellerProfile.socialLinks.website = parsedSocialLinks.website;
     }
 
     await user.save();

@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
     bannerUrl: { type: String },
     profileImage: { type: String },
     bio: { type: String },
+    portfolioUrl: { type: String },
     socialLinks: {
       instagram: { type: String, default: '' },
       facebook: { type: String, default: '' },

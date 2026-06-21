@@ -42,6 +42,8 @@ export default function SellerDashboard() {
     bannerUrl: '', profileImage: '', bio: '', portfolioUrl: '',
     socialLinks: { instagram: '', facebook: '', twitter: '', website: '' }
   });
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
@@ -178,7 +180,13 @@ export default function SellerDashboard() {
     if (!token) return;
     setLoading(true);
     try {
-      const updatedUser = await updateSellerProfile(token, profileForm.bannerUrl, profileForm.profileImage, profileForm.bio, profileForm.socialLinks);
+      const formData = new FormData();
+      formData.append('bio', profileForm.bio);
+      formData.append('socialLinks', JSON.stringify(profileForm.socialLinks));
+      if (bannerFile) formData.append('bannerFile', bannerFile);
+      if (profileImageFile) formData.append('profileImageFile', profileImageFile);
+
+      const updatedUser = await updateSellerProfile(token, formData);
       setUserProfile(updatedUser.user);
       localStorage.setItem('user', JSON.stringify(updatedUser.user));
       setStatus('Profile updated successfully!');
@@ -297,11 +305,6 @@ export default function SellerDashboard() {
                         : '0 days on platform'}
                     </span>
                   </div>
-                  {profileForm.portfolioUrl && (
-                    <a href={profileForm.portfolioUrl} target="_blank" rel="noopener noreferrer" className={styles.portfolioLink}>
-                      <LinkIcon size={16} /> View Portfolio
-                    </a>
-                  )}
                 </div>
               </div>
 
@@ -344,21 +347,19 @@ export default function SellerDashboard() {
             <form className={styles.form} onSubmit={handleProfileSubmit} style={{ maxWidth: '800px', marginTop: '20px' }}>
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
-                  <label>Banner Image URL <small>(Recommended: 1200x300 px)</small></label>
-                  <input placeholder="https://..." value={profileForm.bannerUrl} onChange={e => setProfileForm({...profileForm, bannerUrl: e.target.value})} />
+                  <label>Banner Image <small>(Recommended: 1200x300 px)</small></label>
+                  <input type="file" accept="image/*" onChange={e => setBannerFile(e.target.files?.[0] || null)} />
+                  {profileForm.bannerUrl && !bannerFile && <small>Current banner is set.</small>}
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Profile Avatar URL</label>
-                  <input placeholder="https://..." value={profileForm.profileImage} onChange={e => setProfileForm({...profileForm, profileImage: e.target.value})} />
+                  <label>Profile Avatar</label>
+                  <input type="file" accept="image/*" onChange={e => setProfileImageFile(e.target.files?.[0] || null)} />
+                  {profileForm.profileImage && !profileImageFile && <small>Current avatar is set.</small>}
                 </div>
               </div>
               <div className={styles.formGroup}>
                 <label>Bio / Description</label>
                 <textarea placeholder="Tell buyers about your shop..." value={profileForm.bio} onChange={e => setProfileForm({...profileForm, bio: e.target.value})} />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Portfolio Link (Optional)</label>
-                <input placeholder="https://your-portfolio.com" value={profileForm.portfolioUrl} onChange={e => setProfileForm({...profileForm, portfolioUrl: e.target.value})} />
               </div>
 
               <h4 style={{ marginTop: '20px', marginBottom: '10px' }}>Social Links</h4>
