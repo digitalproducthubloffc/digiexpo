@@ -257,11 +257,7 @@ export default function SellerDashboard() {
           </div>
         )}
 
-        {activeTab === 'profile' && (
-          <div className={styles.tabContent}>
-            {/* Empty Profile Tab */}
-          </div>
-        )}
+        {/* Profile tab intentionally empty */}
 
         {activeTab === 'settings' && (
           <div className={styles.tabContent}>
