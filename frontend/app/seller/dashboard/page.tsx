@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchSellerAnalytics, addPaymentMethod, purchaseVerification, updateSellerProfile, fetchProducts, createProduct, BASE_URL, fetchAllChats, adminReplyChat, adminMarkChatRead } from '@/lib/api';
-import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity, Send } from 'lucide-react';
+import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity, Send, User } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import Navbar from '@/components/Navbar';
 import styles from './sellerDashboard.module.css';
@@ -11,7 +11,7 @@ import styles from './sellerDashboard.module.css';
 export default function SellerDashboard() {
   const [token, setToken] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'analytics' | 'profile' | 'products' | 'payments' | 'verification' | 'chats' | 'affiliates'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'profile' | 'products' | 'payments' | 'verification' | 'chats' | 'affiliates' | 'settings'>('profile');
   
   // Analytics State
   const [analytics, setAnalytics] = useState<any>(null);
@@ -193,13 +193,15 @@ export default function SellerDashboard() {
         {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.logo}>Seller Portal</div>
-        <nav className={styles.nav}>
+        <nav className={styles.nav} style={{ flex: 1 }}>
+          <button className={activeTab === 'profile' ? styles.active : ''} onClick={() => setActiveTab('profile')}><User size={20}/> Profile</button>
           <button className={activeTab === 'analytics' ? styles.active : ''} onClick={() => setActiveTab('analytics')}><BarChart3 size={20}/> Analytics</button>
-          <button className={activeTab === 'profile' ? styles.active : ''} onClick={() => setActiveTab('profile')}><Settings size={20}/> Profile & Shop</button>
           <button className={activeTab === 'products' ? styles.active : ''} onClick={() => setActiveTab('products')}><Package size={20}/> My Products</button>
           <button className={activeTab === 'chats' ? styles.active : ''} onClick={() => setActiveTab('chats')}><MessageCircle size={20}/> Customer Chats</button>
           <button className={activeTab === 'verification' ? styles.active : ''} onClick={() => setActiveTab('verification')}><BadgeCheck size={20}/> Verification</button>
           <button className={activeTab === 'payments' ? styles.active : ''} onClick={() => setActiveTab('payments')}><DollarSign size={20}/> Payments</button>
+          <div style={{ flex: 1 }}></div>
+          <button className={activeTab === 'settings' ? styles.active : ''} onClick={() => setActiveTab('settings')}><Settings size={20}/> Settings</button>
         </nav>
       </aside>
 
@@ -301,6 +303,14 @@ export default function SellerDashboard() {
                 {loading ? 'Saving...' : 'Save Profile Settings'}
               </button>
             </form>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className={styles.tabContent}>
+            <h3>Account Settings</h3>
+            <p className={styles.verifyDesc}>Manage your seller account credentials and preferences.</p>
+            <div className={styles.statusBox}>More account settings coming soon! For now, please use the Profile tab to edit your shop details.</div>
           </div>
         )}
 
