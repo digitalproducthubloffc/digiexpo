@@ -39,7 +39,7 @@ export default function SellerDashboard() {
 
   // Profile Settings
   const [profileForm, setProfileForm] = useState({
-    bannerUrl: '', profileImage: '', bio: '',
+    bannerUrl: '', profileImage: '', bio: '', portfolioUrl: '',
     socialLinks: { instagram: '', facebook: '', twitter: '', website: '' }
   });
 
@@ -63,6 +63,7 @@ export default function SellerDashboard() {
         bannerUrl: user.sellerProfile.bannerUrl || '',
         profileImage: user.sellerProfile.profileImage || '',
         bio: user.sellerProfile.bio || '',
+        portfolioUrl: user.sellerProfile.portfolioUrl || '',
         socialLinks: user.sellerProfile.socialLinks || { instagram: '', facebook: '', twitter: '', website: '' }
       });
     }
@@ -213,10 +214,8 @@ export default function SellerDashboard() {
         </nav>
       </aside>
 
-      {/* Main Content */}
-      <main className={styles.main}>
-
-
+      {/* Main Content Area */}
+      <main className={styles.main} style={activeTab === 'profile' ? { padding: 0 } : {}}>
         {status && <div className={styles.statusBox}>{status}</div>}
 
         {activeTab === 'analytics' && analytics && (
@@ -285,19 +284,24 @@ export default function SellerDashboard() {
                   <h2 className={styles.profileName}>{userProfile?.name || 'Seller Name'}</h2>
                   <p className={styles.profileBio}>{profileForm.bio || 'No bio set yet.'}</p>
                   <div className={styles.profileStats}>
-                    <span className={styles.pStat}>
+                    <span className={styles.pStat} title="Rating">
                       <svg width="16" height="16" fill="#f59e0b" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                      4.9 (Reviews)
+                      {analytics?.rating ? `${analytics.rating.toFixed(1)} (${analytics.totalReviews} Reviews)` : '0 Reviews'}
                     </span>
-                    <span className={styles.pStat}>🌍 {userProfile?.country || 'Pakistan'}</span>
-                    <span className={styles.pStat}>🛍 {analytics?.totalSales || 0} sales</span>
-                    <span className={styles.pStat}>📦 {products.length} products</span>
-                    <span className={styles.pStat}>
+                    {userProfile?.country && <span className={styles.pStat} title="Country">🌍 {userProfile.country}</span>}
+                    <span className={styles.pStat} title="Total Sales">🛍 {analytics?.totalSales || 0} sales</span>
+                    <span className={styles.pStat} title="Total Products">📦 {products.length} products</span>
+                    <span className={styles.pStat} title="Time on platform">
                       📅 {userProfile?.createdAt
                         ? `${Math.floor((Date.now() - new Date(userProfile.createdAt).getTime()) / (1000 * 60 * 60 * 24))} days on platform`
-                        : '—'}
+                        : '0 days on platform'}
                     </span>
                   </div>
+                  {profileForm.portfolioUrl && (
+                    <a href={profileForm.portfolioUrl} target="_blank" rel="noopener noreferrer" className={styles.portfolioLink}>
+                      <LinkIcon size={16} /> View Portfolio
+                    </a>
+                  )}
                 </div>
               </div>
 
@@ -320,7 +324,7 @@ export default function SellerDashboard() {
                 )}
                 {profileForm.socialLinks?.website && (
                   <a href={profileForm.socialLinks.website} target="_blank" rel="noopener noreferrer" className={styles.socialIcon} title="Website">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/></svg>
                   </a>
                 )}
                 {!profileForm.socialLinks?.instagram && !profileForm.socialLinks?.twitter && !profileForm.socialLinks?.facebook && !profileForm.socialLinks?.website && (
@@ -344,14 +348,17 @@ export default function SellerDashboard() {
                   <input placeholder="https://..." value={profileForm.bannerUrl} onChange={e => setProfileForm({...profileForm, bannerUrl: e.target.value})} />
                 </div>
                 <div className={styles.formGroup}>
-                  <label>Profile Picture (DP) URL <small>(Recommended: 150x150 px)</small></label>
+                  <label>Profile Avatar URL</label>
                   <input placeholder="https://..." value={profileForm.profileImage} onChange={e => setProfileForm({...profileForm, profileImage: e.target.value})} />
                 </div>
               </div>
-              
               <div className={styles.formGroup}>
                 <label>Bio / Description</label>
-                <textarea placeholder="Tell customers about yourself and your products..." value={profileForm.bio} onChange={e => setProfileForm({...profileForm, bio: e.target.value})} rows={4} />
+                <textarea placeholder="Tell buyers about your shop..." value={profileForm.bio} onChange={e => setProfileForm({...profileForm, bio: e.target.value})} />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Portfolio Link (Optional)</label>
+                <input placeholder="https://your-portfolio.com" value={profileForm.portfolioUrl} onChange={e => setProfileForm({...profileForm, portfolioUrl: e.target.value})} />
               </div>
 
               <h4 style={{ marginTop: '20px', marginBottom: '10px' }}>Social Links</h4>
