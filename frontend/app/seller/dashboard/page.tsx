@@ -21,8 +21,10 @@ export default function SellerDashboard() {
 
   // Products State
   const [products, setProducts] = useState<any[]>([]);
+  const [addProductStep, setAddProductStep] = useState(1);
   const [productForm, setProductForm] = useState({
-    title: '', description: '', category: '', originalPrice: '', realPrice: '', affiliateShare: '0', termsAndConditions: '', isFree: false
+    title: '', description: '', category: '', originalPrice: '', realPrice: '', affiliateShare: '0', isFree: false,
+    postPurchaseHeadline: '', postPurchaseMessage: '', postPurchaseLinkUrl: '', postPurchaseLinkText: ''
   });
   const [files, setFiles] = useState({ thumbnail: null, digitalFile: null });
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -113,8 +115,18 @@ export default function SellerDashboard() {
     try {
       const fd = new FormData();
       Object.entries(productForm).forEach(([key, val]) => {
-        if (key !== 'isFree') fd.append(key, val as string);
+        if (key !== 'isFree' && !key.startsWith('postPurchase')) {
+          fd.append(key, val as string);
+        }
       });
+      
+      const postPurchaseObj = {
+        headline: productForm.postPurchaseHeadline,
+        message: productForm.postPurchaseMessage,
+        linkUrl: productForm.postPurchaseLinkUrl,
+        linkText: productForm.postPurchaseLinkText
+      };
+      fd.append('postPurchase', JSON.stringify(postPurchaseObj));
       
       // If it's free, force prices to 0
       if (productForm.isFree) {
@@ -127,6 +139,7 @@ export default function SellerDashboard() {
 
       setFiles({ thumbnail: null, digitalFile: null });
       setThumbnailPreview('');
+      setAddProductStep(1);
       
       // Refresh the product list
       await createProduct(fd, token);
@@ -507,71 +520,109 @@ export default function SellerDashboard() {
             <div className={styles.productCreationLayout}>
               {/* LEFT: FORM */}
               <form className={styles.form} onSubmit={handleProductSubmit}>
-                <div className={styles.formGroup}>
-                  <label>Title</label>
-                  <input required placeholder="Product Title" value={productForm.title} onChange={e => setProductForm({...productForm, title: e.target.value})} />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>Description</label>
-                  <textarea required placeholder="Product Description" value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})} />
-                </div>
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '12px', padding: '10px 0' }}>
-                    <input 
-                      type="checkbox" 
-                      id="isFreeCheckbox"
-                      checked={productForm.isFree} 
-                      onChange={e => {
-                        setProductForm({...productForm, isFree: e.target.checked, originalPrice: e.target.checked ? '0' : '', realPrice: e.target.checked ? '0' : ''});
-                      }} 
-                      style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                    />
-                    <label htmlFor="isFreeCheckbox" style={{ cursor: 'pointer', margin: 0, color: '#10b981' }}>Offer this product for FREE</label>
-                  </div>
-                </div>
+                {addProductStep === 1 ? (
+                  <>
+                    <h4 style={{ margin: '0 0 20px 0', color: '#0f172a' }}>Step 1: Before Buying (Product Details)</h4>
+                    <div className={styles.formGroup}>
+                      <label>Title</label>
+                      <input required placeholder="Product Title" value={productForm.title} onChange={e => setProductForm({...productForm, title: e.target.value})} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Description</label>
+                      <textarea required placeholder="Product Description" value={productForm.description} onChange={e => setProductForm({...productForm, description: e.target.value})} />
+                    </div>
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '12px', padding: '10px 0' }}>
+                        <input 
+                          type="checkbox" 
+                          id="isFreeCheckbox"
+                          checked={productForm.isFree} 
+                          onChange={e => {
+                            setProductForm({...productForm, isFree: e.target.checked, originalPrice: e.target.checked ? '0' : '', realPrice: e.target.checked ? '0' : ''});
+                          }} 
+                          style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                        />
+                        <label htmlFor="isFreeCheckbox" style={{ cursor: 'pointer', margin: 0, color: '#10b981' }}>Offer this product for FREE</label>
+                      </div>
+                    </div>
 
-                <div className={styles.formRow}>
-                  <div className={styles.formGroup}>
-                    <label>Original Price</label>
-                    <input required type="number" placeholder="99" value={productForm.isFree ? '0' : productForm.originalPrice} disabled={productForm.isFree} onChange={e => setProductForm({...productForm, originalPrice: e.target.value})} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Selling Price</label>
-                    <input required type="number" placeholder="49" value={productForm.isFree ? '0' : productForm.realPrice} disabled={productForm.isFree} onChange={e => setProductForm({...productForm, realPrice: e.target.value})} />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label>Category</label>
-                    <input required placeholder="e.g. Notion Templates" value={productForm.category} onChange={e => setProductForm({...productForm, category: e.target.value})} />
-                  </div>
-                </div>
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup}>
+                        <label>Original Price</label>
+                        <input required type="number" placeholder="99" value={productForm.isFree ? '0' : productForm.originalPrice} disabled={productForm.isFree} onChange={e => setProductForm({...productForm, originalPrice: e.target.value})} />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Selling Price</label>
+                        <input required type="number" placeholder="49" value={productForm.isFree ? '0' : productForm.realPrice} disabled={productForm.isFree} onChange={e => setProductForm({...productForm, realPrice: e.target.value})} />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Category</label>
+                        <input required placeholder="e.g. Notion Templates" value={productForm.category} onChange={e => setProductForm({...productForm, category: e.target.value})} />
+                      </div>
+                    </div>
 
-                <div className={styles.formGroup}>
-                  <label>Affiliate Share (%)</label>
-                  <input type="number" placeholder="20" value={productForm.affiliateShare} onChange={e => setProductForm({...productForm, affiliateShare: e.target.value})} />
-                  <small>Percentage of your earnings you are willing to give to affiliates.</small>
-                </div>
+                    <div className={styles.formGroup}>
+                      <label>Affiliate Share (%)</label>
+                      <input type="number" placeholder="20" value={productForm.affiliateShare} onChange={e => setProductForm({...productForm, affiliateShare: e.target.value})} />
+                      <small>Percentage of your earnings you are willing to give to affiliates.</small>
+                    </div>
 
-                <div className={styles.formRow}>
-                  <div className={styles.fileInputBox}>
-                    <label>Thumbnail Image</label>
-                    <input type="file" onChange={handleThumbnailChange} />
-                  </div>
-                  <div className={styles.fileInputBox}>
-                    <label>Digital File (Zip/PDF)</label>
-                    <input type="file" onChange={(e: any) => setFiles({...files, digitalFile: e.target.files[0]})} />
-                  </div>
-                </div>
+                    <div className={styles.formRow}>
+                      <div className={styles.fileInputBox}>
+                        <label>Thumbnail Image</label>
+                        <input type="file" onChange={handleThumbnailChange} />
+                      </div>
+                      <div className={styles.fileInputBox}>
+                        <label>Digital File (Zip/PDF)</label>
+                        <input type="file" onChange={(e: any) => setFiles({...files, digitalFile: e.target.files[0]})} />
+                      </div>
+                    </div>
 
-                <button type="submit" className={styles.submitBtn} disabled={loading}>
-                  {loading ? 'Publishing...' : 'Publish Product'}
-                </button>
+                    <button type="button" onClick={() => setAddProductStep(2)} className={styles.submitBtn} style={{ background: '#7c3aed' }}>
+                      Next
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <h4 style={{ margin: '0 0 20px 0', color: '#0f172a' }}>Step 2: After Buying (Post-Purchase Details)</h4>
+                    <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px' }}>This information will be shown to the customer immediately after they purchase.</p>
+                    
+                    <div className={styles.formGroup}>
+                      <label>Thank You Headline</label>
+                      <input placeholder="e.g. Thanks for your purchase!" value={productForm.postPurchaseHeadline} onChange={e => setProductForm({...productForm, postPurchaseHeadline: e.target.value})} />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label>Post-Purchase Message</label>
+                      <textarea placeholder="e.g. Here is how you can access your templates..." value={productForm.postPurchaseMessage} onChange={e => setProductForm({...productForm, postPurchaseMessage: e.target.value})} />
+                    </div>
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup}>
+                        <label>Action Link URL (Optional)</label>
+                        <input type="url" placeholder="https://..." value={productForm.postPurchaseLinkUrl} onChange={e => setProductForm({...productForm, postPurchaseLinkUrl: e.target.value})} />
+                      </div>
+                      <div className={styles.formGroup}>
+                        <label>Action Link Text</label>
+                        <input placeholder="e.g. Join Discord" value={productForm.postPurchaseLinkText} onChange={e => setProductForm({...productForm, postPurchaseLinkText: e.target.value})} />
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
+                      <button type="button" onClick={() => setAddProductStep(1)} className={styles.submitBtn} style={{ background: '#e2e8f0', color: '#0f172a', flex: 1 }}>
+                        Back
+                      </button>
+                      <button type="submit" className={styles.submitBtn} disabled={loading} style={{ flex: 2 }}>
+                        {loading ? 'Publishing...' : 'Publish Product'}
+                      </button>
+                    </div>
+                  </>
+                )}
               </form>
 
               {/* RIGHT: LIVE PREVIEW */}
               <div className={styles.previewSection}>
                 <h4>Live Preview</h4>
                 <p className={styles.previewSubtitle}>This is how your product will appear to customers in the catalog.</p>
-                <div className={styles.previewContainer}>
+                <div className={styles.previewContainer} style={{ pointerEvents: 'none' }}>
                   <ProductCard 
                     _id="preview"
                     title={productForm.title || "Amazing Digital Product"}
