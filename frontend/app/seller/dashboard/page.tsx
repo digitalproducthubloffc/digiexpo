@@ -207,13 +207,7 @@ export default function SellerDashboard() {
 
       {/* Main Content */}
       <main className={styles.main}>
-        {/* Profile Banner */}
-        <div className={styles.banner}>
-          <div className={styles.bannerOverlay}>
-            <h2>{userProfile?.name} {verificationTier !== 'none' && <BadgeCheck color="#10b981" />}</h2>
-            <p>Seller Dashboard</p>
-          </div>
-        </div>
+
 
         {status && <div className={styles.statusBox}>{status}</div>}
 
@@ -257,8 +251,7 @@ export default function SellerDashboard() {
 
         {activeTab === 'profile' && (
           <div className={styles.tabContent}>
-            <h3>Your Profile</h3>
-            <p className={styles.verifyDesc}>Profile overview coming soon.</p>
+            {/* Empty Profile Tab */}
           </div>
         )}
 
