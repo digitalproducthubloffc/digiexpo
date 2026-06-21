@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { fetchSellerAnalytics, addPaymentMethod, purchaseVerification, updateSellerProfile, fetchProducts, createProduct, BASE_URL, fetchAllChats, adminReplyChat, adminMarkChatRead } from '@/lib/api';
 import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity, Send } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
+import Navbar from '@/components/Navbar';
 import styles from './sellerDashboard.module.css';
 
 export default function SellerDashboard() {
@@ -186,8 +187,10 @@ export default function SellerDashboard() {
   };
 
   return (
-    <div className={styles.container}>
-      {/* Sidebar */}
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Navbar />
+      <div className={styles.container} style={{ flex: 1, minHeight: 0 }}>
+        {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.logo}>Seller Portal</div>
         <nav className={styles.nav}>
@@ -494,6 +497,7 @@ export default function SellerDashboard() {
           </div>
         )}
       </main>
+      </div>
     </div>
   );
 }
