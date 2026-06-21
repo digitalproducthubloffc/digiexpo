@@ -515,7 +515,17 @@ export default function SellerDashboard() {
 
         {activeTab === 'add_product' && (
           <div className={styles.tabContent}>
-            <h3>Add New Product</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h3 style={{ margin: 0 }}>Add New Product</h3>
+              <a 
+                href={`/shop/${userProfile?._id}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: '#e2e8f0', color: '#0f172a', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s' }}
+              >
+                <Eye size={16} /> Live Preview
+              </a>
+            </div>
             
             <div className={styles.productCreationLayout}>
               {/* LEFT: FORM */}
