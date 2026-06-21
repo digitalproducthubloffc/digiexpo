@@ -43,6 +43,7 @@ const productSchema = new mongoose.Schema({
   },
   rating: { type: Number, default: 5 },
   numReviews: { type: Number, default: 0 },
+  views: { type: Number, default: 0 }, // Analytics: Total profile views
   reviews: [reviewSchema],
   tags: [String],
   inStock: { type: Boolean, default: true },

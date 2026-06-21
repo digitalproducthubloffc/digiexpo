@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchSellerAnalytics, addPaymentMethod, purchaseVerification, updateSellerProfile, fetchProducts, createProduct, BASE_URL, fetchAllChats, adminReplyChat, adminMarkChatRead } from '@/lib/api';
-import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity, Send, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity, Send, User, ChevronLeft, ChevronRight, PlusCircle } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import Navbar from '@/components/Navbar';
 import FollowModal from '@/components/FollowModal';
@@ -12,7 +12,7 @@ import styles from './sellerDashboard.module.css';
 export default function SellerDashboard() {
   const [token, setToken] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'analytics' | 'profile' | 'products' | 'payments' | 'verification' | 'chats' | 'affiliates' | 'settings'>('profile');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'profile' | 'products' | 'add_product' | 'payments' | 'verification' | 'chats' | 'affiliates' | 'settings'>('profile');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
   // Analytics State
@@ -125,9 +125,16 @@ export default function SellerDashboard() {
       if (files.thumbnail) fd.append('thumbnail', files.thumbnail);
       if (files.digitalFile) fd.append('digitalFile', files.digitalFile);
 
+      setFiles({ thumbnail: null, digitalFile: null });
+      setThumbnailPreview('');
+      
+      // Refresh the product list
       await createProduct(fd, token);
+      await loadProducts(userProfile._id);
+      
+      // Redirect to products list
+      setActiveTab('products');
       setStatus('Product created successfully!');
-      loadProducts();
     } catch (err: any) {
       setStatus(err.message || 'Error creating product');
     }
@@ -219,8 +226,8 @@ export default function SellerDashboard() {
           <button className={activeTab === 'profile' ? styles.active : ''} onClick={() => setActiveTab('profile')} title="Profile"><User size={20}/>{sidebarOpen && ' Profile'}</button>
           <button className={activeTab === 'analytics' ? styles.active : ''} onClick={() => setActiveTab('analytics')} title="Analytics"><BarChart3 size={20}/>{sidebarOpen && ' Analytics'}</button>
           <button className={activeTab === 'products' ? styles.active : ''} onClick={() => setActiveTab('products')} title="My Products"><Package size={20}/>{sidebarOpen && ' My Products'}</button>
+          <button className={activeTab === 'add_product' ? styles.active : ''} onClick={() => setActiveTab('add_product')} title="Add Product"><PlusCircle size={20}/>{sidebarOpen && ' Add Product'}</button>
           <button className={activeTab === 'chats' ? styles.active : ''} onClick={() => setActiveTab('chats')} title="Customer Chats"><MessageCircle size={20}/>{sidebarOpen && ' Customer Chats'}</button>
-          <button className={activeTab === 'verification' ? styles.active : ''} onClick={() => setActiveTab('verification')} title="Verification"><BadgeCheck size={20}/>{sidebarOpen && ' Verification'}</button>
           <button className={activeTab === 'payments' ? styles.active : ''} onClick={() => setActiveTab('payments')} title="Payments"><DollarSign size={20}/>{sidebarOpen && ' Payments'}</button>
           <div style={{ flex: 1 }}></div>
           <button className={activeTab === 'settings' ? styles.active : ''} onClick={() => setActiveTab('settings')} title="Settings"><Settings size={20}/>{sidebarOpen && ' Settings'}</button>
@@ -251,6 +258,10 @@ export default function SellerDashboard() {
               <div className={styles.statCard}>
                 <h4>Total Sales</h4>
                 <div className={styles.statValue}>{analytics.totalSales}</div>
+              </div>
+              <div className={styles.statCard}>
+                <h4>Total Views</h4>
+                <div className={styles.statValue}>{analytics.totalViews || 0}</div>
               </div>
             </div>
 
@@ -457,6 +468,40 @@ export default function SellerDashboard() {
 
         {activeTab === 'products' && (
           <div className={styles.tabContent}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+              <h3 style={{ margin: 0 }}>My Products</h3>
+              <button 
+                onClick={() => setActiveTab('add_product')}
+                style={{ background: '#7c3aed', color: 'white', padding: '10px 20px', borderRadius: '12px', border: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+              >
+                <PlusCircle size={18} /> Add New Product
+              </button>
+            </div>
+            
+            {products.length === 0 ? (
+              <div style={{ padding: '60px 20px', textAlign: 'center', background: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+                <Package size={48} color="#94a3b8" style={{ marginBottom: '16px' }} />
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', color: '#334155' }}>No products yet</h4>
+                <p style={{ margin: '0 0 24px 0', color: '#64748b' }}>Start building your catalog by adding your first product.</p>
+                <button 
+                  onClick={() => setActiveTab('add_product')}
+                  style={{ background: '#0f172a', color: 'white', padding: '12px 24px', borderRadius: '12px', border: 'none', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Create Product
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '28px' }}>
+                {products.map((product: any) => (
+                  <ProductCard key={product._id} {...product} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'add_product' && (
+          <div className={styles.tabContent}>
             <h3>Add New Product</h3>
             
             <div className={styles.productCreationLayout}>
@@ -504,11 +549,6 @@ export default function SellerDashboard() {
                   <label>Affiliate Share (%)</label>
                   <input type="number" placeholder="20" value={productForm.affiliateShare} onChange={e => setProductForm({...productForm, affiliateShare: e.target.value})} />
                   <small>Percentage of your earnings you are willing to give to affiliates.</small>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Terms & Conditions</label>
-                  <textarea placeholder="e.g. No refunds on digital products" value={productForm.termsAndConditions} onChange={e => setProductForm({...productForm, termsAndConditions: e.target.value})} />
                 </div>
 
                 <div className={styles.formRow}>
@@ -579,43 +619,6 @@ export default function SellerDashboard() {
                 ) : (
                   <div className={styles.emptyChat}>Select a conversation</div>
                 )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'verification' && (
-          <div className={styles.tabContent}>
-            <h3>Get Verified</h3>
-            <p className={styles.verifyDesc}>Boost your sales by showing customers you are a trusted seller. Verified sellers get priority search ranking and custom badges.</p>
-            <div className={styles.tiersGrid}>
-              <div className={styles.tierCard}>
-                <h4>Standard Badge</h4>
-                <div className={styles.price}>$5</div>
-                <ul>
-                  <li>Blue Checkmark</li>
-                  <li>Standard Support</li>
-                </ul>
-                <button onClick={() => handleVerifyPurchase('tier1', 5)} className={styles.tierBtn}>Purchase</button>
-              </div>
-              <div className={styles.tierCard}>
-                <h4>Pro Seller</h4>
-                <div className={styles.price}>$7</div>
-                <ul>
-                  <li>Gold Checkmark</li>
-                  <li>Lower Platform Fees</li>
-                </ul>
-                <button onClick={() => handleVerifyPurchase('tier2', 7)} className={styles.tierBtn}>Purchase</button>
-              </div>
-              <div className={styles.tierCard}>
-                <h4>Elite Partner</h4>
-                <div className={styles.price}>$10</div>
-                <ul>
-                  <li>Diamond Checkmark</li>
-                  <li>Lowest Platform Fees</li>
-                  <li>Priority Analytics</li>
-                </ul>
-                <button onClick={() => handleVerifyPurchase('tier3', 10)} className={styles.tierBtn}>Purchase</button>
               </div>
             </div>
           </div>

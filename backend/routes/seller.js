@@ -58,9 +58,14 @@ router.get('/analytics', verifyToken, verifySeller, async (req, res) => {
       sales: countryStats[name]
     })).sort((a, b) => b.sales - a.sales);
 
+    // Calculate total views
+    const sellerProducts = await Product.find({ sellerId });
+    const totalViews = sellerProducts.reduce((sum, p) => sum + (p.views || 0), 0);
+
     res.json({
       totalRevenue,
       totalSales,
+      totalViews,
       salesByCountry,
       transactions: transactions.slice(0, 50) // Return last 50 for table
     });
