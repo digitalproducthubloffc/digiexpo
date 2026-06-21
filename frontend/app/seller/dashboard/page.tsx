@@ -257,6 +257,13 @@ export default function SellerDashboard() {
 
         {activeTab === 'profile' && (
           <div className={styles.tabContent}>
+            <h3>Your Profile</h3>
+            <p className={styles.verifyDesc}>Profile overview coming soon.</p>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className={styles.tabContent}>
             <h3>Shop Profile Settings</h3>
             <p className={styles.verifyDesc}>Customize how your public shop looks to customers.</p>
             
@@ -303,14 +310,6 @@ export default function SellerDashboard() {
                 {loading ? 'Saving...' : 'Save Profile Settings'}
               </button>
             </form>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className={styles.tabContent}>
-            <h3>Account Settings</h3>
-            <p className={styles.verifyDesc}>Manage your seller account credentials and preferences.</p>
-            <div className={styles.statusBox}>More account settings coming soon! For now, please use the Profile tab to edit your shop details.</div>
           </div>
         )}
 
