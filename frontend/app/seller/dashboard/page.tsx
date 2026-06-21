@@ -50,7 +50,6 @@ export default function SellerDashboard() {
 
   const [followModalOpen, setFollowModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'followers' | 'following'>('followers');
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
@@ -160,7 +159,23 @@ export default function SellerDashboard() {
     if (file) {
       setFiles({ ...files, thumbnail: file as any });
       setThumbnailPreview(URL.createObjectURL(file));
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+         // store base64 in a data attribute or state if needed, or we just rely on localStorage for simple text
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const openLivePreview = () => {
+    const previewData = {
+      ...productForm,
+      sellerId: userProfile?._id,
+      image: thumbnailPreview || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+    };
+    localStorage.setItem('digiexpo_product_preview', JSON.stringify(previewData));
+    window.open('/product/preview', '_blank');
   };
 
   const handleVerifyPurchase = async (tier: string, price: number) => {
@@ -519,7 +534,8 @@ export default function SellerDashboard() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h3 style={{ margin: 0 }}>Add New Product</h3>
               <button 
-                onClick={() => setPreviewModalOpen(true)}
+                type="button"
+                onClick={openLivePreview}
                 style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: '#e2e8f0', color: '#0f172a', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s' }}
               >
                 <Eye size={16} /> Live Preview
@@ -577,13 +593,9 @@ export default function SellerDashboard() {
                     </div>
 
                     <div className={styles.formRow}>
-                      <div className={styles.fileInputBox}>
+                      <div className={styles.fileInputBox} style={{ width: '100%' }}>
                         <label>Thumbnail Image</label>
                         <input type="file" onChange={handleThumbnailChange} />
-                      </div>
-                      <div className={styles.fileInputBox}>
-                        <label>Digital File (Zip/PDF)</label>
-                        <input type="file" onChange={(e: any) => setFiles({...files, digitalFile: e.target.files[0]})} />
                       </div>
                     </div>
 
@@ -615,6 +627,13 @@ export default function SellerDashboard() {
                       </div>
                     </div>
 
+                    <div className={styles.formRow} style={{ marginTop: '10px' }}>
+                      <div className={styles.fileInputBox} style={{ width: '100%' }}>
+                        <label>Digital File (Zip/PDF)</label>
+                        <input type="file" onChange={(e: any) => setFiles({...files, digitalFile: e.target.files[0]})} />
+                      </div>
+                    </div>
+
                     <div style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
                       <button type="button" onClick={() => setAddProductStep(1)} className={styles.submitBtn} style={{ background: '#e2e8f0', color: '#0f172a', flex: 1 }}>
                         Back
@@ -627,28 +646,6 @@ export default function SellerDashboard() {
                 )}
               </form>
             </div>
-            
-            {/* LIVE PREVIEW MODAL */}
-            {previewModalOpen && (
-              <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }} onClick={() => setPreviewModalOpen(false)}>
-                <div style={{ background: 'white', borderRadius: '24px', padding: '40px', maxWidth: '400px', width: '100%', position: 'relative' }} onClick={e => e.stopPropagation()}>
-                  <button onClick={() => setPreviewModalOpen(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>✕</button>
-                  <h4 style={{ margin: '0 0 8px 0', fontSize: '1.2rem', color: '#0f172a', textAlign: 'center' }}>Live Preview</h4>
-                  <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '24px', textAlign: 'center' }}>This is how your product will appear in the catalog.</p>
-                  <div style={{ pointerEvents: 'none' }}>
-                    <ProductCard 
-                      _id="preview"
-                      title={productForm.title || "Amazing Digital Product"}
-                      category={productForm.category || "Category"}
-                      originalPrice={productForm.isFree ? 0 : (Number(productForm.originalPrice) || 99)}
-                      realPrice={productForm.isFree ? 0 : (Number(productForm.realPrice) || 49)}
-                      description={productForm.description || "Start typing a description to see it appear here..."}
-                      image={thumbnailPreview || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
