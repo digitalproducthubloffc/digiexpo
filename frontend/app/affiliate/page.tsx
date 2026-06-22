@@ -72,7 +72,7 @@ export default function AffiliatePage() {
             </div>
             <h3 className={styles.cardTitle}>Instant Payouts</h3>
             <p className={styles.cardDesc}>
-              Get paid swiftly and securely via Razorpay, PayPal, or Wire Transfer with no hidden fees.
+              Get paid swiftly and securely via Razorpay (UPI/Bank Transfer) with no hidden fees.
             </p>
           </div>
 
