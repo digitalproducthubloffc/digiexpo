@@ -434,3 +434,59 @@ export async function fetchFollowing(userId: string) {
   if (!res.ok) throw new Error('Failed to fetch following');
   return res.json();
 }
+
+// ───── Withdrawal API ─────
+
+export async function requestWithdrawal(token: string, amount: number, method: string, details: string) {
+  const res = await fetch(`${API_URL}/seller/withdraw`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ amount, method, details })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || 'Failed to request withdrawal');
+  }
+  return res.json();
+}
+
+export async function fetchSellerWithdrawals(token: string) {
+  const res = await fetch(`${API_URL}/seller/withdrawals`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch withdrawals');
+  return res.json();
+}
+
+export async function fetchAdminWithdrawals(token: string) {
+  const res = await fetch(`${API_URL}/admin/withdrawals`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch admin withdrawals');
+  return res.json();
+}
+
+export async function approveWithdrawal(token: string, id: string) {
+  const res = await fetch(`${API_URL}/admin/withdrawals/${id}/approve`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || 'Failed to approve withdrawal');
+  }
+  return res.json();
+}
+
+export async function rejectWithdrawal(token: string, id: string) {
+  const res = await fetch(`${API_URL}/admin/withdrawals/${id}/reject`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || 'Failed to reject withdrawal');
+  }
+  return res.json();
+}
+

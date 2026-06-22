@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchSellerAnalytics, addPaymentMethod, purchaseVerification, updateSellerProfile, fetchProducts, createProduct, BASE_URL, fetchAllChats, adminReplyChat, adminMarkChatRead } from '@/lib/api';
+import { fetchSellerAnalytics, addPaymentMethod, purchaseVerification, updateSellerProfile, fetchProducts, createProduct, BASE_URL, fetchAllChats, adminReplyChat, adminMarkChatRead, fetchSellerWithdrawals, requestWithdrawal } from '@/lib/api';
 import { BarChart3, Settings, DollarSign, Package, MessageCircle, Link as LinkIcon, BadgeCheck, Upload, PlayCircle, Eye, Activity, Send, User, ChevronLeft, ChevronRight, PlusCircle } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import Navbar from '@/components/Navbar';
@@ -32,8 +32,12 @@ export default function SellerDashboard() {
   // Verification
   const [verificationTier, setVerificationTier] = useState('none');
 
-  // Payments
-  const [paymentDetails, setPaymentDetails] = useState({ type: 'paypal', details: '' });
+  // Payments & Withdrawals
+  const [paymentDetails, setPaymentDetails] = useState({ type: 'upi', details: '' });
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [withdrawalModalOpen, setWithdrawalModalOpen] = useState(false);
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [selectedMethodIndex, setSelectedMethodIndex] = useState(0);
 
   // Chats
   const [chats, setChats] = useState<any[]>([]);
@@ -79,7 +83,17 @@ export default function SellerDashboard() {
     loadAnalytics(storedToken, timeRange);
     loadProducts(user._id);
     loadChats(storedToken);
+    loadWithdrawals(storedToken);
   }, [router, timeRange]);
+
+  const loadWithdrawals = async (t: string) => {
+    try {
+      const data = await fetchSellerWithdrawals(t);
+      setWithdrawals(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const loadAnalytics = async (t: string, range: string) => {
     try {
@@ -195,12 +209,51 @@ export default function SellerDashboard() {
   const handleAddPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return;
+    setLoading(true);
     try {
-      await addPaymentMethod(token, paymentDetails.type, paymentDetails.details);
+      const updatedUser = await addPaymentMethod(token, paymentDetails.type, paymentDetails.details);
+      setUserProfile(updatedUser.user);
+      localStorage.setItem('user', JSON.stringify(updatedUser.user));
       setStatus('Payment method added successfully');
+      setPaymentDetails({ type: 'upi', details: '' });
     } catch (err: any) {
       setStatus(err.message);
     }
+    setLoading(false);
+  };
+
+  const handleRequestWithdrawal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+    const amount = parseFloat(withdrawalAmount);
+    if (!amount || amount <= 0) {
+      setStatus('Invalid amount');
+      return;
+    }
+    const methodObj = userProfile?.sellerProfile?.paymentMethods?.[selectedMethodIndex];
+    if (!methodObj) {
+      setStatus('Please select a valid payment method');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await requestWithdrawal(token, amount, methodObj.type, methodObj.details);
+      
+      // Update balance
+      const updatedUser = { ...userProfile };
+      updatedUser.sellerProfile.balance = res.balance;
+      setUserProfile(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      setStatus('Withdrawal requested successfully!');
+      setWithdrawalModalOpen(false);
+      setWithdrawalAmount('');
+      loadWithdrawals(token);
+    } catch (err: any) {
+      setStatus(err.message);
+    }
+    setLoading(false);
   };
 
   const handleReplyChat = async (e: React.FormEvent) => {
@@ -688,28 +741,101 @@ export default function SellerDashboard() {
 
         {activeTab === 'payments' && (
           <div className={styles.tabContent}>
-            <h3>Withdrawal Methods</h3>
+            <h3>Withdrawals & Payments</h3>
+            
             <div className={styles.paymentCard}>
-              <h4>Current Balance</h4>
-              <h2>₹{analytics?.totalRevenue?.toLocaleString() || 0}</h2>
-              <button className={styles.withdrawBtn}>Request Withdrawal</button>
+              <h4>Available Balance</h4>
+              <h2>₹{userProfile?.sellerProfile?.balance?.toLocaleString() || 0}</h2>
+              <button 
+                className={styles.withdrawBtn} 
+                onClick={() => setWithdrawalModalOpen(true)}
+                disabled={!userProfile?.sellerProfile?.balance || userProfile.sellerProfile.balance <= 0}
+                style={{ opacity: (!userProfile?.sellerProfile?.balance || userProfile.sellerProfile.balance <= 0) ? 0.5 : 1 }}
+              >
+                Request Withdrawal
+              </button>
             </div>
 
-            <h4 style={{marginTop: '2rem'}}>Add Payment Method</h4>
-            <form className={styles.form} onSubmit={handleAddPayment}>
-              <div className={styles.formGroup}>
-                <label>Method Type</label>
-                <select value={paymentDetails.type} onChange={e => setPaymentDetails({...paymentDetails, type: e.target.value})} className={styles.select}>
-                  <option value="paypal">PayPal</option>
-                  <option value="bank">Bank Transfer (NEFT/RTGS)</option>
-                </select>
+            <div style={{ marginTop: '3rem' }}>
+              <h4>Saved Payment Methods</h4>
+              {userProfile?.sellerProfile?.paymentMethods?.length > 0 ? (
+                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                  {userProfile.sellerProfile.paymentMethods.map((m: any, i: number) => (
+                    <div key={i} style={{ padding: '15px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', minWidth: '200px' }}>
+                      <p style={{ margin: '0 0 5px 0', fontWeight: 'bold', textTransform: 'uppercase', color: '#475569' }}>{m.type}</p>
+                      <p style={{ margin: 0, color: '#0f172a' }}>{m.details}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: '#64748b' }}>No payment methods saved.</p>
+              )}
+
+              <h4 style={{marginTop: '2rem'}}>Add New Payment Method (India Only)</h4>
+              <form className={styles.form} onSubmit={handleAddPayment}>
+                <div className={styles.formGroup}>
+                  <label>Method Type</label>
+                  <select value={paymentDetails.type} onChange={e => setPaymentDetails({...paymentDetails, type: e.target.value})} className={styles.select}>
+                    <option value="upi">UPI ID</option>
+                    <option value="bank">Indian Bank Account (NEFT/IMPS)</option>
+                  </select>
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Details</label>
+                  <input 
+                    required 
+                    placeholder={paymentDetails.type === 'upi' ? "e.g. yourname@okhdfcbank" : "Account Number & IFSC Code"} 
+                    value={paymentDetails.details} 
+                    onChange={e => setPaymentDetails({...paymentDetails, details: e.target.value})} 
+                  />
+                </div>
+                <button type="submit" className={styles.submitBtn} disabled={loading}>
+                  {loading ? 'Saving...' : 'Save Method'}
+                </button>
+              </form>
+            </div>
+
+            <div style={{ marginTop: '4rem' }}>
+              <h4>Withdrawal History</h4>
+              <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Amount</th>
+                      <th>Method</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {withdrawals.length > 0 ? withdrawals.map((w, index) => (
+                      <tr key={index}>
+                        <td>{new Date(w.createdAt).toLocaleDateString()}</td>
+                        <td style={{ fontWeight: 'bold' }}>₹{w.amount.toLocaleString()}</td>
+                        <td>
+                          <span style={{ textTransform: 'uppercase', fontSize: '0.85rem', background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>
+                            {w.method}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{
+                            padding: '4px 8px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 600,
+                            background: w.status === 'approved' ? '#dcfce7' : w.status === 'rejected' ? '#fee2e2' : '#fef3c7',
+                            color: w.status === 'approved' ? '#166534' : w.status === 'rejected' ? '#991b1b' : '#92400e'
+                          }}>
+                            {w.status.charAt(0).toUpperCase() + w.status.slice(1)}
+                          </span>
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={4} style={{ textAlign: 'center', color: '#64748b' }}>No withdrawals yet.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <div className={styles.formGroup}>
-                <label>Details (Email or Account No.)</label>
-                <input required placeholder="Enter details..." value={paymentDetails.details} onChange={e => setPaymentDetails({...paymentDetails, details: e.target.value})} />
-              </div>
-              <button type="submit" className={styles.submitBtn}>Save Method</button>
-            </form>
+            </div>
           </div>
         )}
       </main>
@@ -723,6 +849,60 @@ export default function SellerDashboard() {
         loggedInUserId={userProfile?._id}
         token={token || undefined}
       />
+
+      {/* Request Withdrawal Modal */}
+      {withdrawalModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent} style={{ maxWidth: '400px' }}>
+            <h3>Request Withdrawal</h3>
+            <button className={styles.closeModalBtn} onClick={() => setWithdrawalModalOpen(false)}>×</button>
+            
+            <form onSubmit={handleRequestWithdrawal} style={{ marginTop: '20px' }}>
+              <div className={styles.formGroup}>
+                <label>Amount to Withdraw (₹)</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  max={userProfile?.sellerProfile?.balance || 0}
+                  required 
+                  value={withdrawalAmount} 
+                  onChange={e => setWithdrawalAmount(e.target.value)} 
+                  placeholder="e.g. 1000"
+                />
+                <small>Available: ₹{userProfile?.sellerProfile?.balance?.toLocaleString() || 0}</small>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Select Payment Method</label>
+                {userProfile?.sellerProfile?.paymentMethods?.length > 0 ? (
+                  <select 
+                    value={selectedMethodIndex} 
+                    onChange={e => setSelectedMethodIndex(Number(e.target.value))}
+                    className={styles.select}
+                  >
+                    {userProfile.sellerProfile.paymentMethods.map((m: any, idx: number) => (
+                      <option key={idx} value={idx}>
+                        {m.type.toUpperCase()} - {m.details}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <p style={{ color: 'red', fontSize: '0.9rem' }}>You must add a payment method first.</p>
+                )}
+              </div>
+
+              <button 
+                type="submit" 
+                className={styles.submitBtn} 
+                disabled={loading || !userProfile?.sellerProfile?.paymentMethods?.length}
+                style={{ marginTop: '20px' }}
+              >
+                {loading ? 'Processing...' : 'Submit Request'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

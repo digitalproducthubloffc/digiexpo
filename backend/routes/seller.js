@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const Product = require('../models/Product');
+const Withdrawal = require('../models/Withdrawal');
 const { verifyToken } = require('./auth');
 const fs = require('fs/promises');
 const { uploadFile } = require('../utils/cloudinary');
@@ -84,6 +85,45 @@ router.post('/payment-methods', verifyToken, verifySeller, async (req, res) => {
     user.sellerProfile.paymentMethods.push({ type, details, isDefault: true });
     await user.save();
     res.json({ message: 'Payment method added successfully', user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Request Withdrawal
+router.post('/withdraw', verifyToken, verifySeller, async (req, res) => {
+  const { amount, method, details } = req.body;
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (amount <= 0 || amount > user.sellerProfile.balance) {
+      return res.status(400).json({ message: 'Invalid amount or insufficient balance' });
+    }
+
+    user.sellerProfile.balance -= amount;
+    await user.save();
+
+    const withdrawal = new Withdrawal({
+      sellerId: user._id,
+      amount,
+      method,
+      details,
+      status: 'pending'
+    });
+    await withdrawal.save();
+
+    res.json({ message: 'Withdrawal requested successfully', balance: user.sellerProfile.balance, withdrawal });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get Withdrawal History
+router.get('/withdrawals', verifyToken, verifySeller, async (req, res) => {
+  try {
+    const withdrawals = await Withdrawal.find({ sellerId: req.user.userId }).sort({ createdAt: -1 });
+    res.json(withdrawals);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

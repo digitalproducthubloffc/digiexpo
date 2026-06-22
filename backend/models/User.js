@@ -34,8 +34,8 @@ const userSchema = new mongoose.Schema({
     },
     verificationTier: { type: String, enum: ['none', 'tier1', 'tier2', 'tier3'], default: 'none' }, // tier1=$5, tier2=$7, tier3=$10
     paymentMethods: [{
-      type: { type: String, enum: ['bank', 'paypal'] },
-      details: { type: String }, // e.g. PayPal email or Bank Account string
+      type: { type: String, enum: ['bank', 'upi'] },
+      details: { type: String }, // e.g. UPI ID or Bank Account string
       isDefault: { type: Boolean, default: false }
     }],
     balance: { type: Number, default: 0 }, // Unwithdrawn earnings

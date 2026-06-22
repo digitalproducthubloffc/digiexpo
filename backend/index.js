@@ -60,6 +60,8 @@ app.use('/api/support', supportRouter);
 app.use('/api/transactions', transactionRouter);
 app.use('/api/seller', sellerRouter);
 app.use('/api/user', userRoutes);
+const adminRouter = require('./routes/admin');
+app.use('/api/admin', adminRouter);
 
 // Basic Route
 app.get('/', (req, res) => {

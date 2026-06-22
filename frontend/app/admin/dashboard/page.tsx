@@ -3,19 +3,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, fetchAllChats, fetchChatById, adminReplyChat, adminMarkChatRead, adminCloseChat, fetchTransactions, addReview, BASE_URL } from '@/lib/api';
-import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye, MessageCircle, Send, Paperclip, DownloadCloud, Activity, Star } from 'lucide-react';
+import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, fetchAllChats, fetchChatById, adminReplyChat, adminMarkChatRead, adminCloseChat, fetchTransactions, addReview, fetchAdminWithdrawals, approveWithdrawal, rejectWithdrawal, BASE_URL } from '@/lib/api';
+import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye, MessageCircle, Send, Paperclip, DownloadCloud, Activity, Star, DollarSign } from 'lucide-react';
 import styles from './dashboard.module.css';
 
 export default function AdminDashboard() {
   const [token, setToken] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates' | 'messages' | 'transactions' | 'reviews'>('analytics');
+  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates' | 'messages' | 'transactions' | 'reviews' | 'withdrawals'>('analytics');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [allBlogs, setAllBlogs] = useState<any[]>([]);
   const [affiliateApps, setAffiliateApps] = useState<any[]>([]);
   const [allTransactions, setAllTransactions] = useState<any[]>([]);
+  const [adminWithdrawals, setAdminWithdrawals] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [countryStats, setCountryStats] = useState<any>({ salesByCountry: [], viewsByCountry: [] });
 
@@ -78,7 +79,8 @@ export default function AdminDashboard() {
         fetchProducts(),
         fetchBlogs(),
         fetchStats(t),
-        fetchSalesByCountry(t),
+        fetchSalesByCountry(t).then(setCountryStats).catch(() => {}),
+        fetchAdminWithdrawals(t).then(setAdminWithdrawals).catch(() => {}),
         fetchAffiliateApplications(t),
         fetchTransactions(t)
       ]);
@@ -256,6 +258,34 @@ export default function AdminDashboard() {
     loadDashboardData(token);
   };
 
+  const handleApproveWithdrawal = async (id: string) => {
+    if (!token || !confirm('Approve this withdrawal? If UPI, RazorpayX will instantly transfer the funds. If Bank Transfer, ensure you have manually wired the funds first.')) return;
+    setLoading(true);
+    try {
+      await approveWithdrawal(token, id);
+      setStatus('✅ Withdrawal approved successfully');
+      loadDashboardData(token);
+    } catch (err: any) {
+      setStatus(`❌ ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRejectWithdrawal = async (id: string) => {
+    if (!token || !confirm('Reject this withdrawal? The amount will be refunded to the seller.')) return;
+    setLoading(true);
+    try {
+      await rejectWithdrawal(token, id);
+      setStatus('✅ Withdrawal rejected and refunded');
+      loadDashboardData(token);
+    } catch (err: any) {
+      setStatus(`❌ ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!token) return null;
 
   return (
@@ -296,6 +326,14 @@ export default function AdminDashboard() {
             </button>
             <button className={activeTab === 'reviews' ? styles.active : ''} onClick={() => setActiveTab('reviews')}>
               <Star size={20} /> Testimonials
+            </button>
+            <button className={activeTab === 'withdrawals' ? styles.active : ''} onClick={() => setActiveTab('withdrawals')}>
+              <DollarSign size={20} /> Withdrawals
+              {adminWithdrawals.filter(w => w.status === 'pending').length > 0 && (
+                <span style={{ background: '#ef4444', color: 'white', borderRadius: '50%', width: 20, height: 20, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, marginLeft: 6 }}>
+                  {adminWithdrawals.filter(w => w.status === 'pending').length}
+                </span>
+              )}
             </button>
           </nav>
 
@@ -367,6 +405,82 @@ export default function AdminDashboard() {
                     ) : <p className={styles.emptyTable}>No sales recorded yet.</p>}
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'withdrawals' && (
+            <div className={styles.manageSection}>
+              <div className={styles.sectionHeader}>
+                <h2>Seller Withdrawals</h2>
+                <p>Manage payout requests. All payouts to Indian sellers (UPI/Bank) are fully automated via RazorpayX.</p>
+              </div>
+              <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Seller</th>
+                      <th>Amount</th>
+                      <th>Method & Details</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {adminWithdrawals.length > 0 ? adminWithdrawals.map(w => (
+                      <tr key={w._id}>
+                        <td>{new Date(w.createdAt).toLocaleDateString()}</td>
+                        <td>
+                          <strong>{w.sellerId?.name || 'Unknown'}</strong><br/>
+                          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{w.sellerId?.email}</span>
+                        </td>
+                        <td style={{ fontWeight: 'bold' }}>₹{w.amount.toLocaleString()}</td>
+                        <td>
+                          <span style={{ textTransform: 'uppercase', fontSize: '0.8rem', background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                            {w.method}
+                          </span><br/>
+                          <span style={{ fontSize: '0.85rem' }}>{w.details}</span>
+                        </td>
+                        <td>
+                          <span style={{
+                            padding: '4px 8px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 600,
+                            background: w.status === 'approved' ? '#dcfce7' : w.status === 'rejected' ? '#fee2e2' : '#fef3c7',
+                            color: w.status === 'approved' ? '#166534' : w.status === 'rejected' ? '#991b1b' : '#92400e'
+                          }}>
+                            {w.status.charAt(0).toUpperCase() + w.status.slice(1)}
+                          </span>
+                        </td>
+                        <td>
+                          {w.status === 'pending' ? (
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button 
+                                onClick={() => handleApproveWithdrawal(w._id)}
+                                style={{ background: '#16a34a', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+                                disabled={loading}
+                              >
+                                Approve
+                              </button>
+                              <button 
+                                onClick={() => handleRejectWithdrawal(w._id)}
+                                style={{ background: '#ef4444', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+                                disabled={loading}
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          ) : (
+                            <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Processed on {w.processedAt ? new Date(w.processedAt).toLocaleDateString() : 'N/A'}</span>
+                          )}
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: 'center', color: '#64748b', padding: '20px' }}>No withdrawal requests found.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
