@@ -75,21 +75,22 @@ export default function AdminDashboard() {
 
   const loadDashboardData = async (t: string) => {
     try {
-      const [prods, blogs, s, cs, apps, trans] = await Promise.all([
+      const [p, b, s, cs, apps, trans, w] = await Promise.all([
         fetchProducts(),
         fetchBlogs(),
         fetchStats(t),
-        fetchSalesByCountry(t).then(setCountryStats).catch(() => {}),
-        fetchAdminWithdrawals(t).then(setAdminWithdrawals).catch(() => {}),
+        fetchSalesByCountry(t),
         fetchAffiliateApplications(t),
-        fetchTransactions(t)
+        fetchTransactions(t),
+        fetchAdminWithdrawals(t)
       ]);
-      setAllProducts(prods);
-      setAllBlogs(blogs);
+      setAllProducts(p);
+      setAllBlogs(b);
       setStats(s);
       setCountryStats(cs);
       setAffiliateApps(apps);
       setAllTransactions(trans);
+      setAdminWithdrawals(w);
     } catch (err) {
       console.error(err);
     }
