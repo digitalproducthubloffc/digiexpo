@@ -81,11 +81,31 @@ function OrderSuccessContent() {
         </div>
 
         <div className={styles.actionBlock}>
-           <p>If your download didn't start automatically:</p>
-           <a href={product?.fileUrl || '#'} download target="_blank" className={styles.downloadBtn}>
-             <Download size={20} />
-             Download File Now
-           </a>
+           {product?.fileUrl && (
+             <>
+               <p>If your download didn't start automatically:</p>
+               <a href={product.fileUrl} download target="_blank" className={styles.downloadBtn}>
+                 <Download size={20} />
+                 Download File Now
+               </a>
+             </>
+           )}
+
+           {/* Post Purchase Content */}
+           {product?.postPurchase && (product.postPurchase.headline || product.postPurchase.message || product.postPurchase.linkUrl || product.postPurchase.imageUrl) && (
+             <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'left' }}>
+               {product.postPurchase.headline && <h3 style={{ fontSize: '1.2rem', color: '#1e293b', marginBottom: '0.5rem' }}>{product.postPurchase.headline}</h3>}
+               {product.postPurchase.message && <p style={{ color: '#475569', marginBottom: '1rem', whiteSpace: 'pre-line' }}>{product.postPurchase.message}</p>}
+               {product.postPurchase.imageUrl && (
+                 <img src={product.postPurchase.imageUrl} alt="Post Purchase" style={{ width: '100%', borderRadius: '8px', marginBottom: '1rem' }} />
+               )}
+               {product.postPurchase.linkUrl && (
+                 <a href={product.postPurchase.linkUrl} target="_blank" rel="noreferrer" className={styles.downloadBtn} style={{ background: '#7c3aed', width: '100%', justifyContent: 'center' }}>
+                   {product.postPurchase.linkText || 'Access Content'}
+                 </a>
+               )}
+             </div>
+           )}
         </div>
 
         <div className={styles.links}>
