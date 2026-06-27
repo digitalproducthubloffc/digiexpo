@@ -75,7 +75,7 @@ export default function AdminDashboard() {
 
   const loadDashboardData = async (t: string) => {
     try {
-      const [p, b, s, cs, apps, trans, w] = await Promise.all([
+      const results = await Promise.allSettled([
         fetchProducts(),
         fetchBlogs(),
         fetchStats(t),
@@ -84,13 +84,14 @@ export default function AdminDashboard() {
         fetchTransactions(t),
         fetchAdminWithdrawals(t)
       ]);
-      setAllProducts(p);
-      setAllBlogs(b);
-      setStats(s);
-      setCountryStats(cs);
-      setAffiliateApps(apps);
-      setAllTransactions(trans);
-      setAdminWithdrawals(w);
+
+      setAllProducts(results[0].status === 'fulfilled' ? results[0].value : []);
+      setAllBlogs(results[1].status === 'fulfilled' ? results[1].value : []);
+      setStats(results[2].status === 'fulfilled' ? results[2].value : { totalRevenue: 0, totalSales: 0, activeUsers: 0, totalProducts: 0 });
+      setCountryStats(results[3].status === 'fulfilled' ? results[3].value : []);
+      setAffiliateApps(results[4].status === 'fulfilled' ? results[4].value : []);
+      setAllTransactions(results[5].status === 'fulfilled' ? results[5].value : []);
+      setAdminWithdrawals(results[6].status === 'fulfilled' ? results[6].value : []);
     } catch (err) {
       console.error(err);
     }
