@@ -490,3 +490,50 @@ export async function rejectWithdrawal(token: string, id: string) {
   return res.json();
 }
 
+// --- COUPON API ---
+export async function createCoupon(token: string, data: any) {
+  const res = await fetch(`${API_URL}/coupons`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}` 
+    },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Failed to create coupon');
+  }
+  return res.json();
+}
+
+export async function fetchCoupons(token: string) {
+  const res = await fetch(`${API_URL}/coupons`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to fetch coupons');
+  return res.json();
+}
+
+export async function deleteCoupon(token: string, id: string) {
+  const res = await fetch(`${API_URL}/coupons/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error('Failed to delete coupon');
+  return res.json();
+}
+
+export async function validateCoupon(code: string) {
+  const res = await fetch(`${API_URL}/coupons/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Invalid coupon');
+  }
+  return res.json();
+}
+

@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, fetchAllChats, fetchChatById, adminReplyChat, adminMarkChatRead, adminCloseChat, fetchTransactions, addReview, fetchAdminWithdrawals, approveWithdrawal, rejectWithdrawal, BASE_URL } from '@/lib/api';
-import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye, MessageCircle, Send, Paperclip, DownloadCloud, Activity, Star, DollarSign } from 'lucide-react';
+import { createProduct, fetchProducts, deleteProduct, fetchStats, fetchSalesByCountry, fetchBlogs, createBlog, deleteBlog, fetchAffiliateApplications, approveAffiliateApplication, fetchAllChats, fetchChatById, adminReplyChat, adminMarkChatRead, adminCloseChat, fetchTransactions, addReview, fetchAdminWithdrawals, approveWithdrawal, rejectWithdrawal, BASE_URL, fetchCoupons, createCoupon, deleteCoupon } from '@/lib/api';
+import { Upload, X, Plus, Image as ImageIcon, Trash2, LayoutGrid, FilePlus, ExternalLink, BarChart3, TrendingUp, Globe, Users, ShoppingBag, BookOpenText, PlayCircle, Eye, MessageCircle, Send, Paperclip, DownloadCloud, Activity, Star, DollarSign, Tag } from 'lucide-react';
 import styles from './dashboard.module.css';
 
 export default function AdminDashboard() {
   const [token, setToken] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates' | 'messages' | 'transactions' | 'reviews' | 'withdrawals'>('analytics');
+  const [activeTab, setActiveTab] = useState<'create' | 'manage' | 'analytics' | 'blog' | 'affiliates' | 'messages' | 'transactions' | 'reviews' | 'withdrawals' | 'coupons'>('analytics');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -19,6 +19,8 @@ export default function AdminDashboard() {
   const [adminWithdrawals, setAdminWithdrawals] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [countryStats, setCountryStats] = useState<any>({ salesByCountry: [], viewsByCountry: [] });
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [couponForm, setCouponForm] = useState({ code: '', discountType: 'percentage', discountValue: '', expiryHours: '24', maxUses: '' });
 
   const [reviewForm, setReviewForm] = useState({ productId: '', name: '', rating: 5, comment: '' });
 
@@ -82,7 +84,8 @@ export default function AdminDashboard() {
         fetchSalesByCountry(t),
         fetchAffiliateApplications(t),
         fetchTransactions(t),
-        fetchAdminWithdrawals(t)
+        fetchAdminWithdrawals(t),
+        fetchCoupons(t)
       ]);
 
       setAllProducts(results[0].status === 'fulfilled' ? results[0].value : []);
@@ -92,6 +95,7 @@ export default function AdminDashboard() {
       setAffiliateApps(results[4].status === 'fulfilled' ? results[4].value : []);
       setAllTransactions(results[5].status === 'fulfilled' ? results[5].value : []);
       setAdminWithdrawals(results[6].status === 'fulfilled' ? results[6].value : []);
+      setCoupons(results[7].status === 'fulfilled' ? results[7].value : []);
     } catch (err) {
       console.error(err);
     }
@@ -288,6 +292,33 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleCouponSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+    setLoading(true);
+    setStatus('');
+    try {
+      await createCoupon(token, couponForm);
+      setStatus('✅ Coupon created successfully!');
+      setCouponForm({ code: '', discountType: 'percentage', discountValue: '', expiryHours: '24', maxUses: '' });
+      loadDashboardData(token);
+    } catch (err: any) {
+      setStatus(`❌ ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteCouponAction = async (id: string) => {
+    if (!token || !confirm('Delete this coupon?')) return;
+    try {
+      await deleteCoupon(token, id);
+      loadDashboardData(token);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (!token) return null;
 
   return (
@@ -323,12 +354,9 @@ export default function AdminDashboard() {
                 </span>
               )}
             </button>
-            <button className={activeTab === 'transactions' ? styles.active : ''} onClick={() => setActiveTab('transactions')}>
-              <Activity size={20} /> Ledger / Sales
-            </button>
-            <button className={activeTab === 'reviews' ? styles.active : ''} onClick={() => setActiveTab('reviews')}>
-              <Star size={20} /> Testimonials
-            </button>
+            <button className={`${styles.navItem} ${activeTab === 'transactions' ? styles.active : ''}`} onClick={() => setActiveTab('transactions')}><Activity size={18}/> Ledger / Sales</button>
+          <button className={`${styles.navItem} ${activeTab === 'coupons' ? styles.active : ''}`} onClick={() => setActiveTab('coupons')}><Tag size={18}/> Promo Codes</button>
+          <button className={`${styles.navItem} ${activeTab === 'reviews' ? styles.active : ''}`} onClick={() => setActiveTab('reviews')}><Star size={18}/> Testimonials</button>
             <button className={activeTab === 'withdrawals' ? styles.active : ''} onClick={() => setActiveTab('withdrawals')}>
               <DollarSign size={20} /> Withdrawals
               {adminWithdrawals.filter(w => w.status === 'pending').length > 0 && (
@@ -991,6 +1019,83 @@ export default function AdminDashboard() {
                   {loading ? 'Publishing...' : 'Publish Testimonial'}
                 </button>
               </form>
+            </div>
+          )}
+          {activeTab === 'coupons' && (
+            <div className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <span className={styles.sub}>PROMOTIONS</span>
+                  <h2>Manage Promo Codes</h2>
+                </div>
+              </div>
+              
+              <div className={styles.grid}>
+                <form onSubmit={handleCouponSubmit} className={styles.formCard}>
+                  <h3>Create New Promo Code</h3>
+                  <div className={styles.inputGroup}>
+                    <label>Code (e.g. LAUNCH50)</label>
+                    <input type="text" placeholder="TEST50" value={couponForm.code} onChange={e => setCouponForm({...couponForm, code: e.target.value.toUpperCase()})} required />
+                  </div>
+                  <div className={styles.fieldPair}>
+                    <div className={styles.inputGroup}>
+                      <label>Discount Type</label>
+                      <select value={couponForm.discountType} onChange={e => setCouponForm({...couponForm, discountType: e.target.value})}>
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount</option>
+                      </select>
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label>Discount Value</label>
+                      <input type="number" placeholder={couponForm.discountType === 'percentage' ? "50" : "10"} value={couponForm.discountValue} onChange={e => setCouponForm({...couponForm, discountValue: e.target.value})} required />
+                    </div>
+                  </div>
+                  <div className={styles.fieldPair}>
+                    <div className={styles.inputGroup}>
+                      <label>Expiry (in Hours)</label>
+                      <input type="number" placeholder="24" value={couponForm.expiryHours} onChange={e => setCouponForm({...couponForm, expiryHours: e.target.value})} required />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label>Max Uses (Optional)</label>
+                      <input type="number" placeholder="Leave empty for unlimited" value={couponForm.maxUses} onChange={e => setCouponForm({...couponForm, maxUses: e.target.value})} />
+                    </div>
+                  </div>
+                  <button type="submit" disabled={loading} className={styles.primaryBtn} style={{ marginTop: '10px' }}>
+                    {loading ? 'Creating...' : 'Create Promo Code'}
+                  </button>
+                </form>
+
+                <div className={styles.tableCard}>
+                  <h3>Active Promo Codes</h3>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Code</th>
+                        <th>Discount</th>
+                        <th>Expiry</th>
+                        <th>Uses</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {coupons.map((c: any) => (
+                        <tr key={c._id}>
+                          <td style={{ fontWeight: 'bold' }}>{c.code}</td>
+                          <td>{c.discountType === 'percentage' ? `${c.discountValue}% OFF` : `$${c.discountValue} OFF`}</td>
+                          <td>{new Date(c.expiryDate).toLocaleDateString()}</td>
+                          <td>{c.maxUses ? `${c.currentUses}/${c.maxUses}` : c.currentUses}</td>
+                          <td>
+                            <button onClick={() => deleteCouponAction(c._id)} className={styles.deleteBtn}><Trash2 size={16}/></button>
+                          </td>
+                        </tr>
+                      ))}
+                      {coupons.length === 0 && (
+                        <tr><td colSpan={5} style={{ textAlign: 'center', padding: '20px' }}>No active promo codes.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
         </main>

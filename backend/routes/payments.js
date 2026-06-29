@@ -6,6 +6,7 @@ const requestIp = require('request-ip');
 const rateLimit = require('express-rate-limit');
 const Transaction = require('../models/Transaction');
 const Product = require('../models/Product');
+const Coupon = require('../models/Coupon');
 const { verifyToken, optionalVerifyToken } = require('./auth');
 const User = require('../models/User');
 const sendEmail = require('../utils/mailer');
@@ -39,7 +40,7 @@ const paymentLimiter = rateLimit({
  * 1. CREATE ORDER (Initiation)
  */
 router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => {
-  const { productId, currency = 'INR', guestInfo, affiliateId } = req.body;
+  const { productId, currency = 'INR', guestInfo, affiliateId, couponCode } = req.body;
   let userId = req.user?.userId;
   const clientIp = requestIp.getClientIp(req);
 
@@ -51,24 +52,45 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
     }
     
     // Calculate final price strictly on backend
-    let finalAmount = 0;
+    let basePrice = 0;
+    let platformFee = 0;
+    
     if (currency === 'INR') {
-      const basePrice = product.priceINR > 0 ? product.priceINR : product.realPrice * 85;
-      const platformFeeINR = 25;
-      finalAmount = basePrice + platformFeeINR;
+      basePrice = product.priceINR > 0 ? product.priceINR : product.realPrice * 85;
+      platformFee = 25;
     } else {
-      const basePrice = product.realPrice;
-      const platformFeeUSD = 0.30;
-      finalAmount = basePrice + platformFeeUSD;
+      basePrice = product.realPrice;
+      platformFee = 0.30;
     }
 
+    // Apply Coupon if provided
+    let appliedCoupon = null;
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
+      if (coupon && coupon.isActive && new Date() <= new Date(coupon.expiryDate)) {
+        if (coupon.maxUses === null || coupon.currentUses < coupon.maxUses) {
+          appliedCoupon = coupon;
+          if (coupon.discountType === 'percentage') {
+            basePrice = basePrice - (basePrice * (coupon.discountValue / 100));
+          } else if (coupon.discountType === 'fixed') {
+            // Fixed discount should be applied based on currency appropriately, or we assume it's in base currency?
+            // Usually fixed is in USD, so for INR we multiply by 85
+            const discountAmount = currency === 'INR' ? (coupon.discountValue * 85) : coupon.discountValue;
+            basePrice = Math.max(0, basePrice - discountAmount);
+          }
+        }
+      }
+    }
+
+    let finalAmount = basePrice + platformFee;
+
     // Fee splits based on product finalAmount
-    let platformFee = finalAmount * 0.10; // 10% platform fee
+    let calculatedPlatformFee = finalAmount * 0.10; // 10% platform fee
     let affiliateEarnings = 0;
     if (affiliateId && product.affiliateShare > 0) {
       affiliateEarnings = finalAmount * (product.affiliateShare / 100);
     }
-    let sellerEarnings = finalAmount - platformFee - affiliateEarnings;
+    let sellerEarnings = finalAmount - calculatedPlatformFee - affiliateEarnings;
 
     // If guest and no userId, check if email already exists or create temp account
     if (!userId && guestInfo) {
@@ -107,6 +129,12 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
       });
       await transaction.save();
       
+      // Increment coupon usage if there was a coupon applied
+      if (appliedCoupon) {
+        appliedCoupon.currentUses += 1;
+        await appliedCoupon.save();
+      }
+
       // Add product to user's purchased list
       await User.findByIdAndUpdate(userId, { $addToSet: { purchasedProducts: productId } });
 
@@ -118,7 +146,12 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
       amount: Math.round(finalAmount * 100), // convert to paise
       currency,
       receipt: `receipt_${Date.now()}`,
-      notes: { productId, userId, ip: clientIp }
+      notes: {
+        productId: productId.toString(),
+        userId: userId.toString(),
+        couponCode: appliedCoupon ? appliedCoupon.code : '',
+        ip: clientIp
+      }
     };
 
     const order = await razorpay.orders.create(options);
@@ -140,6 +173,12 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
     });
 
     await transaction.save();
+
+    // Increment coupon usage
+    if (appliedCoupon) {
+      appliedCoupon.currentUses += 1;
+      await appliedCoupon.save();
+    }
 
     res.json(order);
   } catch (err) {

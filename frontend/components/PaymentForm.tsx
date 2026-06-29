@@ -72,7 +72,8 @@ export default function PaymentForm({ product }: { product: any }) {
         body: JSON.stringify({
           productId: product._id,
           amount: product.calculatedTotal,
-          currency: product.selectedCurrency
+          currency: product.selectedCurrency,
+          couponCode: product.appliedCouponCode || undefined
         })
       });
 

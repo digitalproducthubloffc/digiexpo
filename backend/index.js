@@ -48,6 +48,8 @@ const supportRouter = require('./routes/support');
 const transactionRouter = require('./routes/transactions');
 const sellerRouter = require('./routes/seller');
 const userRoutes = require('./routes/user');
+const adminRouter = require('./routes/admin');
+const couponRouter = require('./routes/coupons');
 
 app.use('/api/auth', authRouter);
 app.use('/api/products', productRouter);
@@ -60,7 +62,7 @@ app.use('/api/support', supportRouter);
 app.use('/api/transactions', transactionRouter);
 app.use('/api/seller', sellerRouter);
 app.use('/api/user', userRoutes);
-const adminRouter = require('./routes/admin');
+app.use('/api/coupons', couponRouter);
 app.use('/api/admin', adminRouter);
 
 // Basic Route
