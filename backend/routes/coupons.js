@@ -1,16 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Coupon = require('../models/Coupon');
-const { verifyToken, optionalVerifyToken } = require('./auth');
-
-// Middleware to ensure user is an admin
-const verifyAdmin = async (req, res, next) => {
-  if (req.user && req.user.role === 'admin') {
-    next();
-  } else {
-    return res.status(403).json({ message: 'Access denied. Admins only.' });
-  }
-};
+const { verifyToken, verifyAdmin, optionalVerifyToken } = require('./auth');
 
 // Create a new coupon (Admin only)
 router.post('/', verifyToken, verifyAdmin, async (req, res) => {
