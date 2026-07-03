@@ -59,10 +59,10 @@ export default function CheckoutFlow({ product }: { product: any }) {
     }
   }
 
-  const platformFeeUSD = 0.30;
+  const platformFeeUSD = basePriceUSD > 0 ? 0.30 : 0;
   const totalUSD = basePriceUSD + platformFeeUSD;
 
-  const platformFeeINR = 25; // roughly 30 cents in INR
+  const platformFeeINR = basePriceINR > 0 ? 25 : 0; // roughly 30 cents in INR
   const totalINR = basePriceINR + platformFeeINR;
 
   return (

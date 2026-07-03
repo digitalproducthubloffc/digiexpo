@@ -57,10 +57,10 @@ router.post('/orders', optionalVerifyToken, paymentLimiter, async (req, res) => 
     
     if (currency === 'INR') {
       basePrice = product.priceINR > 0 ? product.priceINR : product.realPrice * 85;
-      platformFee = 25;
+      platformFee = basePrice > 0 ? 25 : 0;
     } else {
       basePrice = product.realPrice;
-      platformFee = 0.30;
+      platformFee = basePrice > 0 ? 0.30 : 0;
     }
 
     // Apply Coupon if provided

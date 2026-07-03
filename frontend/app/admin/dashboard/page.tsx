@@ -665,8 +665,8 @@ export default function AdminDashboard() {
                   <div className={styles.metaCol}>
                     <div className={styles.inputGroup}><label>Title</label><input type="text" value={fields.title} onChange={e => setFields({...fields, title: e.target.value})} required /></div>
                     <div className={styles.fieldPair}>
-                      <div className={styles.inputGroup}><label>Actual Price ($)</label><input type="number" value={fields.originalPrice} onChange={e => setFields({...fields, originalPrice: e.target.value})} required /></div>
-                      <div className={styles.inputGroup}><label>Discounted Price ($)</label><input type="number" value={fields.realPrice} onChange={e => setFields({...fields, realPrice: e.target.value})} required /></div>
+                      <div className={styles.inputGroup}><label>Actual Price ($)</label><input type="number" step="0.01" min="0" placeholder="0 for Free" value={fields.originalPrice} onChange={e => setFields({...fields, originalPrice: e.target.value})} /></div>
+                      <div className={styles.inputGroup}><label>Discounted Price ($)</label><input type="number" step="0.01" min="0" placeholder="0 for Free" value={fields.realPrice} onChange={e => setFields({...fields, realPrice: e.target.value})} /></div>
                     </div>
                     <div className={styles.inputGroup} style={{ marginBottom: '15px' }}>
                       <label>Product Type</label>
@@ -701,8 +701,8 @@ export default function AdminDashboard() {
                           setStatus('❌ Please upload the Main Preview image first.');
                           return;
                         }
-                        if (!fields.title || !fields.description || !fields.realPrice || !fields.type) {
-                          setStatus('❌ Please fill Title, Price, Type and Description first.');
+                        if (!fields.title || !fields.description || fields.realPrice === '' || fields.originalPrice === '' || !fields.type) {
+                          setStatus('❌ Please fill Title, Price (0 for free), Type and Description first.');
                           return;
                         }
                         setStatus('');
