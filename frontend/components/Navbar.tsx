@@ -229,6 +229,27 @@ export default function Navbar() {
           <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>MY ACCOUNT</Link>
         )}
       </div>
+      
+      {/* Category Sub-Navbar */}
+      <div className={styles.subNavbar} style={{ borderTop: '1px solid #f1f5f9', background: '#fff', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+        <div className="container-fluid" style={{ display: 'flex', gap: '20px', overflowX: 'auto', padding: '0 20px', alignItems: 'center' }}>
+          <Link href="/catalog?free=true" style={{ color: '#64748b', textDecoration: 'none', fontWeight: '500', fontSize: '0.9rem', whiteSpace: 'nowrap', padding: '4px 10px', borderRadius: '20px', background: '#f8fafc' }}>
+            🎉 Free Assets
+          </Link>
+          <Link href="/catalog?type=Notion%20Template" style={{ color: '#475569', textDecoration: 'none', fontWeight: '500', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
+            Notion Templates
+          </Link>
+          <Link href="/catalog?type=Website%2FPortfolio" style={{ color: '#475569', textDecoration: 'none', fontWeight: '500', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
+            Website Templates
+          </Link>
+          <Link href="/catalog?type=Drawings%2FSketch" style={{ color: '#475569', textDecoration: 'none', fontWeight: '500', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
+            Drawings & Sketches
+          </Link>
+          <Link href="/catalog" style={{ color: '#7c3aed', textDecoration: 'none', fontWeight: '600', fontSize: '0.9rem', whiteSpace: 'nowrap', marginLeft: 'auto' }}>
+            Browse All →
+          </Link>
+        </div>
+      </div>
     </nav>
   );
 }
