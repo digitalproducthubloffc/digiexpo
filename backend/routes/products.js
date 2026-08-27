@@ -252,12 +252,14 @@ router.post('/:id/reviews', verifyToken, async (req, res) => {
     }
 
     // Check if user already reviewed
-    const alreadyReviewed = product.reviews.find(
-      (r) => r.user && r.user.toString() === userId.toString()
-    );
+    if (!req.user.admin) {
+      const alreadyReviewed = product.reviews.find(
+        (r) => r.user && r.user.toString() === userId.toString()
+      );
 
-    if (alreadyReviewed) {
-      return res.status(400).json({ message: 'You have already reviewed this product' });
+      if (alreadyReviewed) {
+        return res.status(400).json({ message: 'You have already reviewed this product' });
+      }
     }
 
     const { mediaUrl, mediaType } = req.body;
